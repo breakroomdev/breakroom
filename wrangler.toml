@@ -1,0 +1,29 @@
+name = "breakroom"
+main = ".open-next/worker.js"
+compatibility_date = "2024-12-30"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
+
+# D1 database binding. Create with:
+#   npx wrangler d1 create breakroom
+# then paste the returned database_id below, and apply migrations with:
+#   npx wrangler d1 migrations apply breakroom --remote
+[[d1_databases]]
+binding = "DB"
+database_name = "breakroom"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+migrations_dir = "drizzle"
+
+# Non-secret vars. Secrets (SESSION_SECRET, CLOUDINARY_API_SECRET,
+# DISCORD_CLIENT_SECRET, ...) must be set with `wrangler secret put`
+# instead of being written here.
+#
+# CLOUDFLARE=true tells src/lib/db/index.ts to use the D1 binding above
+# instead of the libSQL driver used everywhere else — required, since
+# OpenNext doesn't otherwise expose a reliable "we're on Workers" signal.
+[vars]
+APP_URL = "https://breakroom.<your-subdomain>.workers.dev"
+CLOUDFLARE = "true"
