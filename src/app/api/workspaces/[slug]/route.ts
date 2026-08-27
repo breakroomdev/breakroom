@@ -1,8 +1,9 @@
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { requireWorkspaceContext } from "@/lib/api/workspace-route";
 import { requirePermission } from "@/lib/auth/authorize";
 import { updateWorkspaceSchema } from "@/lib/validation/workspace";
+import { RESERVED_SLUGS } from "@/lib/constants";
 import { jsonError, jsonOk, withErrorHandling } from "@/lib/api/response";
 import { isSameOriginRequest } from "@/lib/api/csrf";
 
@@ -19,6 +20,18 @@ export const PATCH = withErrorHandling(async (req: Request, { params }: { params
 
   const body = updateWorkspaceSchema.parse(await req.json());
   const db = await getDb();
+
+  if (body.slug && body.slug !== membership.workspace.slug) {
+    if (RESERVED_SLUGS.has(body.slug)) {
+      return jsonError("That workspace URL is reserved. Please choose another.", 409);
+    }
+    const taken = await db.query.workspaces.findFirst({
+      where: and(eq(schema.workspaces.slug, body.slug), ne(schema.workspaces.id, membership.workspace.id)),
+    });
+    if (taken) {
+      return jsonError("That workspace URL is already taken.", 409);
+    }
+  }
 
   const [updated] = await db
     .update(schema.workspaces)

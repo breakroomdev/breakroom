@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Check } from "lucide-react";
+import { Check, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { AvatarUpload } from "@/components/settings/avatar-upload";
 import { useWorkspace } from "@/components/workspace-context";
 import { WORKSPACE_THEMES, THEME_META, type WorkspaceTheme } from "@/lib/theme";
-import { cn } from "@/lib/utils";
+import { cn, slugify } from "@/lib/utils";
 
 interface Initial {
   name: string;
@@ -68,6 +68,8 @@ export function WorkspaceSettingsForm({ initial }: { initial: Initial }) {
         </CardContent>
       </Card>
 
+      <WorkspaceSlugForm currentSlug={workspace.slug} />
+
       <Card>
         <CardHeader>
           <CardTitle>Workspace theme</CardTitle>
@@ -90,5 +92,79 @@ export function WorkspaceSettingsForm({ initial }: { initial: Initial }) {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function WorkspaceSlugForm({ currentSlug }: { currentSlug: string }) {
+  const router = useRouter();
+  const [slug, setSlug] = React.useState(currentSlug);
+  const [saving, setSaving] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const normalized = slugify(slug);
+  const changed = normalized !== currentSlug;
+
+  async function save() {
+    if (!normalized || !changed) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/workspaces/${currentSlug}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: normalized }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error?.message ?? "Couldn't update the workspace URL.");
+        return;
+      }
+      toast.success("Workspace URL updated");
+      router.push(`/${normalized}/admin/workspace`);
+      router.refresh();
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Workspace URL</CardTitle>
+        <CardDescription>This is the address your team uses to sign in and access this workspace.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <Field label="URL" htmlFor="slug">
+          <div className="flex items-center rounded-lg border border-input bg-card shadow-sm focus-within:ring-2 focus-within:ring-ring">
+            <span className="pl-3 text-sm text-muted-foreground">breakroom.app/</span>
+            <input
+              id="slug"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              className="h-10 flex-1 bg-transparent pr-3 text-sm outline-none"
+              maxLength={48}
+            />
+          </div>
+        </Field>
+
+        {changed ? (
+          <p className="flex items-start gap-2 rounded-lg bg-warning/15 px-3 py-2 text-sm text-warning-foreground">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>
+              This will change your workspace address to <strong>breakroom.app/{normalized || "…"}</strong>. Any
+              bookmarked or shared links to breakroom.app/{currentSlug} will stop working.
+            </span>
+          </p>
+        ) : null}
+
+        {error ? <p className="text-sm font-medium text-destructive">{error}</p> : null}
+
+        <div className="flex justify-end">
+          <Button onClick={save} disabled={!changed || !normalized} loading={saving}>
+            Update URL
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

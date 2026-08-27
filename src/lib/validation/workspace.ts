@@ -2,8 +2,15 @@ import { z } from "zod";
 
 export const WORKSPACE_THEMES = ["default", "ocean", "sunset", "forest", "lavender", "berry", "slate"] as const;
 
+export const slugSchema = z
+  .string()
+  .min(2, "Must be at least 2 characters")
+  .max(48, "Must be at most 48 characters")
+  .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Only lowercase letters, numbers and hyphens");
+
 export const updateWorkspaceSchema = z.object({
   name: z.string().min(2).max(80).optional(),
+  slug: slugSchema.optional(),
   description: z.string().max(500).optional().nullable(),
   logoUrl: z.string().url().optional().nullable(),
   theme: z.enum(WORKSPACE_THEMES).optional(),
