@@ -52,6 +52,10 @@ heavyweight than enterprise HR software.
   / dark / system mode, set per-workspace with per-user overrides, all via CSS variables.
 - **Open source & self-hostable** — MIT licensed, no proprietary backend, deployable to
   Cloudflare, Vercel, or any Node host.
+- **Staff panel** — instance-wide admin at `/staff` for whoever runs the deployment (gated by
+  a per-user `isSiteAdmin` flag, not tied to any one workspace): browse every workspace, mark
+  one "verified" (a checkmark shown next to its name), permanently delete a workspace, and
+  broadcast an announcement notification to every member of every workspace.
 
 ## Tech stack
 

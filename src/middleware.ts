@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { RESERVED_SLUGS } from "@/lib/constants";
+import { RESERVED_SLUGS, ROOT_ROUTES } from "@/lib/constants";
 
 /** The app's own root domain, derived from APP_URL (e.g. "breakroom.team"). */
 function getRootHost(): string | null {
@@ -27,11 +27,11 @@ export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const firstSegment = pathname.split("/")[1] ?? "";
 
-  // Already prefixed with the workspace slug, a reserved top-level route, an API
+  // Already prefixed with the workspace slug, an actual top-level page, an API
   // call (already slug-scoped in its own path), or a static file — leave alone.
   if (
     firstSegment === subdomain ||
-    RESERVED_SLUGS.has(firstSegment) ||
+    ROOT_ROUTES.has(firstSegment) ||
     firstSegment.includes(".") ||
     pathname.startsWith("/api/") ||
     pathname.startsWith("/_next/")

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Logo } from "@/components/brand/logo";
 import { WorkspaceLogo } from "@/components/brand/workspace-logo";
+import { VerifiedBadge } from "@/components/brand/verified-badge";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { Plus, ArrowRight } from "lucide-react";
 
@@ -48,7 +49,10 @@ export default async function WorkspacesPage() {
                 <div className="flex items-center gap-3">
                   <WorkspaceLogo name={workspace.name} logoUrl={workspace.logoUrl} size="lg" />
                   <div>
-                    <p className="font-medium">{workspace.name}</p>
+                    <p className="flex items-center gap-1 font-medium">
+                      {workspace.name}
+                      {workspace.verifiedAt ? <VerifiedBadge /> : null}
+                    </p>
                     <p className="text-sm capitalize text-muted-foreground">{role.name}</p>
                   </div>
                 </div>

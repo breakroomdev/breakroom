@@ -8,6 +8,7 @@ import { DiscordButton } from "@/components/auth/discord-button";
 import { WorkspacePicker } from "@/components/auth/workspace-picker";
 import { Avatar } from "@/components/ui/avatar";
 import { workspaceUrl, workspaceDisplayHost } from "@/lib/workspace-url";
+import { getRequestWorkspaceSlug } from "@/lib/workspace-base-path";
 
 export const metadata = { title: "Sign in" };
 
@@ -39,8 +40,10 @@ export default async function LoginPage({
 }: {
   searchParams: { workspace?: string; error?: string; next?: string };
 }) {
-  const { passwordEnabled, discordEnabled, workspace, allowSelfRegistration } = await getWorkspaceAuthContext(searchParams.workspace);
-  const redirectTo = searchParams.next ?? (searchParams.workspace ? workspaceUrl(searchParams.workspace) : "/workspaces");
+  const fromHost = !searchParams.workspace && !!getRequestWorkspaceSlug();
+  const workspaceSlug = searchParams.workspace ?? getRequestWorkspaceSlug() ?? undefined;
+  const { passwordEnabled, discordEnabled, workspace, allowSelfRegistration } = await getWorkspaceAuthContext(workspaceSlug);
+  const redirectTo = searchParams.next ?? (workspaceSlug ? workspaceUrl(workspaceSlug) : "/workspaces");
 
   return (
     <AuthShell title={workspace ? "Sign in" : "Welcome back"} subtitle={workspace ? undefined : "Find your workspace, or sign in to see all of yours."}>
@@ -58,9 +61,11 @@ export default async function LoginPage({
                 <p className="text-xs text-muted-foreground">{workspaceDisplayHost(workspace.slug)}</p>
               </div>
             </div>
-            <Link href="/login" className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" aria-label="Search a different workspace">
-              <X className="h-4 w-4" />
-            </Link>
+            {fromHost ? null : (
+              <Link href="/login" className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" aria-label="Search a different workspace">
+                <X className="h-4 w-4" />
+              </Link>
+            )}
           </div>
         ) : (
           <WorkspacePicker basePath="/login" />
@@ -74,7 +79,7 @@ export default async function LoginPage({
           </div>
         ) : null}
 
-        {discordEnabled ? <DiscordButton workspaceSlug={searchParams.workspace} /> : null}
+        {discordEnabled ? <DiscordButton workspaceSlug={workspaceSlug} /> : null}
 
         {discordEnabled && passwordEnabled ? (
           <div className="flex items-center gap-3 text-xs uppercase text-muted-foreground">
@@ -84,7 +89,7 @@ export default async function LoginPage({
           </div>
         ) : null}
 
-        {passwordEnabled ? <LoginForm workspaceSlug={searchParams.workspace} redirectTo={redirectTo} /> : null}
+        {passwordEnabled ? <LoginForm workspaceSlug={workspaceSlug} redirectTo={redirectTo} /> : null}
 
         {!passwordEnabled && !discordEnabled ? (
           <p className="text-center text-sm text-muted-foreground">

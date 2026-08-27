@@ -18,4 +18,25 @@ export const RESERVED_SLUGS = new Set([
   "search",
   "terms",
   "privacy",
+  "staff",
+]);
+
+/**
+ * Actual top-level pages that exist outside `/[workspaceSlug]/...` — used by
+ * middleware to decide what NOT to rewrite on a workspace subdomain. This is
+ * narrower than RESERVED_SLUGS on purpose: words like "admin" and "settings"
+ * are reserved so no workspace can be named that, but they're only real pages
+ * *under* a workspace (`/{slug}/admin`), not at the root.
+ */
+export const ROOT_ROUTES = new Set([
+  "login",
+  "register",
+  "forgot-password",
+  "reset-password",
+  "join",
+  "workspaces",
+  "new-workspace",
+  "staff",
+  "terms",
+  "privacy",
 ]);

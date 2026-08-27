@@ -8,6 +8,7 @@ import { DiscordButton } from "@/components/auth/discord-button";
 import { WorkspacePicker } from "@/components/auth/workspace-picker";
 import { Avatar } from "@/components/ui/avatar";
 import { workspaceDisplayHost } from "@/lib/workspace-url";
+import { getRequestWorkspaceSlug } from "@/lib/workspace-base-path";
 
 export const metadata = { title: "Create your account" };
 
@@ -27,7 +28,9 @@ async function getJoinWorkspace(slug?: string) {
 }
 
 export default async function RegisterPage({ searchParams }: { searchParams: { workspace?: string } }) {
-  const joinWorkspace = await getJoinWorkspace(searchParams.workspace);
+  const fromHost = !searchParams.workspace && !!getRequestWorkspaceSlug();
+  const workspaceSlug = searchParams.workspace ?? getRequestWorkspaceSlug() ?? undefined;
+  const joinWorkspace = await getJoinWorkspace(workspaceSlug);
   const globalDiscordEnabled = Boolean(process.env.DISCORD_CLIENT_ID && process.env.DISCORD_CLIENT_SECRET);
   const discordEnabled = joinWorkspace ? joinWorkspace.discordEnabled || globalDiscordEnabled : globalDiscordEnabled;
 
@@ -46,9 +49,11 @@ export default async function RegisterPage({ searchParams }: { searchParams: { w
                 <p className="text-xs text-muted-foreground">{workspaceDisplayHost(joinWorkspace.slug)}</p>
               </div>
             </div>
-            <Link href="/register" className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" aria-label="Search a different workspace">
-              <X className="h-4 w-4" />
-            </Link>
+            {fromHost ? null : (
+              <Link href="/register" className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" aria-label="Search a different workspace">
+                <X className="h-4 w-4" />
+              </Link>
+            )}
           </div>
         ) : (
           <>

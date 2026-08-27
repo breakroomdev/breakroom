@@ -8,7 +8,7 @@ import type { WorkspaceContextValue } from "@/components/workspace-context";
 
 interface AppShellProps {
   ctx: WorkspaceContextValue;
-  otherWorkspaces: { slug: string; name: string; logoUrl: string | null }[];
+  otherWorkspaces: { slug: string; name: string; logoUrl: string | null; verifiedAt: string | null }[];
   children: React.ReactNode;
 }
 
@@ -23,7 +23,10 @@ export function AppShell({ ctx, otherWorkspaces, children }: AppShellProps) {
 
       <aside aria-label="Workspace navigation" className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-border bg-card/60 p-3 lg:flex">
         <div className="mb-2 px-1 py-2">
-          <WorkspaceSwitcher current={{ slug: ctx.workspace.slug, name: ctx.workspace.name, logoUrl: ctx.workspace.logoUrl }} others={otherWorkspaces} />
+          <WorkspaceSwitcher
+            current={{ slug: ctx.workspace.slug, name: ctx.workspace.name, logoUrl: ctx.workspace.logoUrl, verifiedAt: ctx.workspace.verifiedAt }}
+            others={otherWorkspaces}
+          />
         </div>
         <nav className="flex-1 overflow-y-auto py-2">
           <SidebarNav basePath={ctx.basePath} isAdmin={isAdmin} />

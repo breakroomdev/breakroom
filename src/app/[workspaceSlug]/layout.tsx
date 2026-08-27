@@ -47,6 +47,7 @@ export default async function WorkspaceLayout({
       slug: membership.workspace.slug,
       logoUrl: membership.workspace.logoUrl,
       theme: membership.workspace.theme,
+      verifiedAt: membership.workspace.verifiedAt?.toISOString() ?? null,
     },
     user: {
       id: user.id,
@@ -65,7 +66,10 @@ export default async function WorkspaceLayout({
   return (
     <div data-workspace-theme={resolvedTheme} className="min-h-screen">
       <WorkspaceProvider value={ctxValue}>
-        <AppShell ctx={ctxValue} otherWorkspaces={otherWorkspaces.map((w) => ({ slug: w.slug, name: w.name, logoUrl: w.logoUrl }))}>
+        <AppShell
+          ctx={ctxValue}
+          otherWorkspaces={otherWorkspaces.map((w) => ({ slug: w.slug, name: w.name, logoUrl: w.logoUrl, verifiedAt: w.verifiedAt?.toISOString() ?? null }))}
+        >
           {children}
         </AppShell>
       </WorkspaceProvider>

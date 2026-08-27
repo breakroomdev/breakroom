@@ -90,6 +90,7 @@ export const workspaces = sqliteTable("workspaces", {
   description: text("description"),
   ownerId: text("owner_id").notNull().references(() => users.id),
   theme: text("theme").notNull().default("default"),
+  verifiedAt: integer("verified_at", { mode: "timestamp_ms" }),
   ...timestamps,
 });
 
@@ -372,6 +373,7 @@ export const notifications = sqliteTable(
         "poll_vote",
         "post_pinned",
         "report",
+        "announcement",
       ],
     }).notNull(),
     title: text("title").notNull(),
@@ -385,6 +387,20 @@ export const notifications = sqliteTable(
     userIdx: index("notifications_user_idx").on(t.userId, t.isRead, t.createdAt),
   })
 );
+
+// ─────────────────────────────────────────────────────────────
+// Staff — instance-wide announcements broadcast to every user
+// ─────────────────────────────────────────────────────────────
+
+export const announcements = sqliteTable("announcements", {
+  id: id(),
+  title: text("title").notNull(),
+  body: text("body"),
+  link: text("link"),
+  recipientCount: integer("recipient_count").notNull().default(0),
+  sentBy: text("sent_by").notNull().references(() => users.id),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
+});
 
 // ─────────────────────────────────────────────────────────────
 // Relations

@@ -49,3 +49,8 @@ export async function requireMembership(userId: string, workspaceSlug: string): 
   if (!membership) throw new AuthError("Not a member of this workspace");
   return membership;
 }
+
+/** Throws ForbiddenError unless the user is a Breakroom staff member (site admin). */
+export function requireSiteAdmin(user: { isSiteAdmin: boolean }): void {
+  if (!user.isSiteAdmin) throw new ForbiddenError("Staff access required");
+}

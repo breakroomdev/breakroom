@@ -7,11 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { workspaceDisplayHost } from "@/lib/workspace-url";
+import { VerifiedBadge } from "@/components/brand/verified-badge";
 
 interface WorkspaceResult {
   name: string;
   slug: string;
   logoUrl: string | null;
+  verifiedAt: string | null;
 }
 
 const LISTBOX_ID = "workspace-search-results";
@@ -148,7 +150,10 @@ export function WorkspacePicker({ basePath }: { basePath: "/login" | "/register"
                   >
                     <Avatar name={w.name} src={w.logoUrl} size="sm" />
                     <div className="min-w-0">
-                      <p className="truncate font-medium">{w.name}</p>
+                      <p className="flex items-center gap-1 truncate font-medium">
+                        <span className="truncate">{w.name}</span>
+                        {w.verifiedAt ? <VerifiedBadge /> : null}
+                      </p>
                       <p className="truncate text-xs text-muted-foreground">{workspaceDisplayHost(w.slug)}</p>
                     </div>
                   </button>

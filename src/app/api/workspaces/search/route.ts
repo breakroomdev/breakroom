@@ -23,7 +23,7 @@ export const GET = withErrorHandling(async (req: Request) => {
   const like = `%${q.toLowerCase()}%`;
 
   const rows = await db
-    .select({ name: schema.workspaces.name, slug: schema.workspaces.slug, logoUrl: schema.workspaces.logoUrl })
+    .select({ name: schema.workspaces.name, slug: schema.workspaces.slug, logoUrl: schema.workspaces.logoUrl, verifiedAt: schema.workspaces.verifiedAt })
     .from(schema.workspaces)
     .where(sql`lower(${schema.workspaces.name}) LIKE ${like} OR lower(${schema.workspaces.slug}) LIKE ${like}`)
     .orderBy(schema.workspaces.name)

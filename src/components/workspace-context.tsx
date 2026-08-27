@@ -6,7 +6,7 @@ import type { Permission } from "@/lib/permissions";
 export interface WorkspaceContextValue {
   /** Path prefix for in-app links — "" on the workspace's own subdomain, "/{slug}" otherwise. */
   basePath: string;
-  workspace: { id: string; name: string; slug: string; logoUrl: string | null; theme: string };
+  workspace: { id: string; name: string; slug: string; logoUrl: string | null; theme: string; verifiedAt: string | null };
   user: { id: string; username: string; displayName: string; avatarUrl: string | null; isSiteAdmin: boolean };
   role: { key: string; name: string };
   permissions: Permission[];

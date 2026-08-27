@@ -20,13 +20,14 @@ import * as schema from "./schema";
  * only available inside a request context.
  */
 
-export type Database = ReturnType<typeof buildNodeDb>;
+export type Database = Awaited<ReturnType<typeof buildNodeDb>>;
 
 let cachedNodeDb: Database | undefined;
 
-function buildNodeDb() {
+async function buildNodeDb() {
   const url = process.env.DATABASE_URL ?? "file:./sqlite.db";
   const client = createClient({ url, authToken: process.env.DATABASE_AUTH_TOKEN });
+  await client.execute("PRAGMA foreign_keys = ON;");
   return drizzle(client, { schema });
 }
 
@@ -43,7 +44,7 @@ export async function getDb(): Promise<Database> {
   }
 
   if (!cachedNodeDb) {
-    cachedNodeDb = buildNodeDb();
+    cachedNodeDb = await buildNodeDb();
   }
   return cachedNodeDb;
 }
