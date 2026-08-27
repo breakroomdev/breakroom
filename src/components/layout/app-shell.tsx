@@ -41,7 +41,14 @@ export function AppShell({ ctx, otherWorkspaces, children }: AppShellProps) {
           </div>
           <div className="flex items-center gap-1.5">
             <NotificationBell workspaceId={ctx.workspace.id} workspaceSlug={ctx.workspace.slug} basePath={ctx.basePath} initialUnread={ctx.unreadNotifications} />
-            <UserMenu basePath={ctx.basePath} name={ctx.user.displayName} username={ctx.user.username} avatarUrl={ctx.user.avatarUrl} isAdmin={isAdmin} />
+            <UserMenu
+              basePath={ctx.basePath}
+              name={ctx.user.displayName}
+              username={ctx.user.username}
+              avatarUrl={ctx.user.avatarUrl}
+              isAdmin={isAdmin}
+              isSiteAdmin={ctx.user.isSiteAdmin}
+            />
           </div>
         </header>
 

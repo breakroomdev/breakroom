@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { User, Settings, LogOut, ShieldCheck } from "lucide-react";
+import { User, Settings, LogOut, ShieldCheck, Crown } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -12,9 +12,10 @@ interface UserMenuProps {
   username: string;
   avatarUrl: string | null;
   isAdmin: boolean;
+  isSiteAdmin: boolean;
 }
 
-export function UserMenu({ basePath, name, username, avatarUrl, isAdmin }: UserMenuProps) {
+export function UserMenu({ basePath, name, username, avatarUrl, isAdmin, isSiteAdmin }: UserMenuProps) {
   const router = useRouter();
 
   async function logout() {
@@ -51,6 +52,14 @@ export function UserMenu({ basePath, name, username, avatarUrl, isAdmin }: UserM
             <Link href={`${basePath}/admin`}>
               <ShieldCheck className="h-4 w-4" />
               Admin dashboard
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
+        {isSiteAdmin ? (
+          <DropdownMenuItem asChild>
+            <Link href="/staff">
+              <Crown className="h-4 w-4" />
+              Staff panel
             </Link>
           </DropdownMenuItem>
         ) : null}
