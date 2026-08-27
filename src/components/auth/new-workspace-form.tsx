@@ -1,15 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
 import { slugify } from "@/lib/utils";
+import { workspaceUrl, workspaceDisplayHost } from "@/lib/workspace-url";
 
 export function NewWorkspaceForm() {
-  const router = useRouter();
   const [name, setName] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -30,8 +29,7 @@ export function NewWorkspaceForm() {
         return;
       }
       toast.success("Workspace created!");
-      router.push(`/${data.slug}`);
-      router.refresh();
+      window.location.href = workspaceUrl(data.slug);
     } finally {
       setLoading(false);
     }
@@ -42,7 +40,7 @@ export function NewWorkspaceForm() {
       <Field label="Workspace name" htmlFor="name">
         <Input id="name" placeholder="Acme Inc." required value={name} onChange={(e) => setName(e.target.value)} />
       </Field>
-      {name ? <p className="text-xs text-muted-foreground">Your workspace URL: /{slugify(name) || "workspace"}</p> : null}
+      {name ? <p className="text-xs text-muted-foreground">Your workspace URL: {workspaceDisplayHost(slugify(name) || "workspace")}</p> : null}
       {error ? <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">{error}</p> : null}
       <Button type="submit" size="lg" className="w-full" loading={loading}>
         Create workspace

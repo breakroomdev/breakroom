@@ -1,12 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { workspaceUrl } from "@/lib/workspace-url";
 
 export function AcceptInviteButton({ token }: { token: string }) {
-  const router = useRouter();
   const [loading, setLoading] = React.useState(false);
 
   async function accept() {
@@ -19,8 +18,7 @@ export function AcceptInviteButton({ token }: { token: string }) {
         return;
       }
       toast.success("You're in!");
-      router.push(`/${data.workspaceSlug}`);
-      router.refresh();
+      window.location.href = workspaceUrl(data.workspaceSlug);
     } finally {
       setLoading(false);
     }

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
+import { isAbsoluteUrl } from "@/lib/workspace-url";
 
 export function LoginForm({ workspaceSlug, redirectTo }: { workspaceSlug?: string; redirectTo: string }) {
   const router = useRouter();
@@ -35,8 +36,12 @@ export function LoginForm({ workspaceSlug, redirectTo }: { workspaceSlug?: strin
       }
 
       toast.success("Welcome back!");
-      router.push(redirectTo);
-      router.refresh();
+      if (isAbsoluteUrl(redirectTo)) {
+        window.location.href = redirectTo;
+      } else {
+        router.push(redirectTo);
+        router.refresh();
+      }
     } catch {
       setError("Couldn't reach the server. Please try again.");
     } finally {

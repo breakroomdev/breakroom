@@ -13,6 +13,7 @@ import { AvatarUpload } from "@/components/settings/avatar-upload";
 import { useWorkspace } from "@/components/workspace-context";
 import { WORKSPACE_THEMES, THEME_META, type WorkspaceTheme } from "@/lib/theme";
 import { cn, slugify } from "@/lib/utils";
+import { workspaceUrl, workspaceDisplayHost, rootDisplayHost } from "@/lib/workspace-url";
 
 interface Initial {
   name: string;
@@ -96,13 +97,13 @@ export function WorkspaceSettingsForm({ initial }: { initial: Initial }) {
 }
 
 function WorkspaceSlugForm({ currentSlug }: { currentSlug: string }) {
-  const router = useRouter();
   const [slug, setSlug] = React.useState(currentSlug);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
   const normalized = slugify(slug);
   const changed = normalized !== currentSlug;
+  const rootHost = rootDisplayHost();
 
   async function save() {
     if (!normalized || !changed) return;
@@ -120,8 +121,7 @@ function WorkspaceSlugForm({ currentSlug }: { currentSlug: string }) {
         return;
       }
       toast.success("Workspace URL updated");
-      router.push(`/${normalized}/admin/workspace`);
-      router.refresh();
+      window.location.href = workspaceUrl(normalized, "/admin/workspace");
     } finally {
       setSaving(false);
     }
@@ -136,14 +136,15 @@ function WorkspaceSlugForm({ currentSlug }: { currentSlug: string }) {
       <CardContent className="space-y-3">
         <Field label="URL" htmlFor="slug">
           <div className="flex items-center rounded-lg border border-input bg-card shadow-sm focus-within:ring-2 focus-within:ring-ring">
-            <span className="pl-3 text-sm text-muted-foreground">breakroom.app/</span>
+            {rootHost ? null : <span className="pl-3 text-sm text-muted-foreground">/</span>}
             <input
               id="slug"
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
-              className="h-10 flex-1 bg-transparent pr-3 text-sm outline-none"
+              className={cn("h-10 flex-1 bg-transparent text-sm outline-none", rootHost ? "pl-3" : "pr-3")}
               maxLength={48}
             />
+            {rootHost ? <span className="pr-3 text-sm text-muted-foreground">.{rootHost}</span> : null}
           </div>
         </Field>
 
@@ -151,8 +152,8 @@ function WorkspaceSlugForm({ currentSlug }: { currentSlug: string }) {
           <p className="flex items-start gap-2 rounded-lg bg-warning/15 px-3 py-2 text-sm text-warning-strong">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>
-              This will change your workspace address to <strong>breakroom.app/{normalized || "…"}</strong>. Any
-              bookmarked or shared links to breakroom.app/{currentSlug} will stop working.
+              This will change your workspace address to <strong>{workspaceDisplayHost(normalized || "…")}</strong>.
+              Any bookmarked or shared links to {workspaceDisplayHost(currentSlug)} will stop working.
             </span>
           </p>
         ) : null}

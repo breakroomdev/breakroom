@@ -6,6 +6,7 @@ import { getOAuthProvider } from "@/lib/auth/providers/registry";
 import { resolveDiscordConfig, OAUTH_STATE_COOKIE } from "@/lib/auth/discord-config";
 import { createSession } from "@/lib/auth/session";
 import { addMemberToWorkspace, generateUniqueUsername } from "@/lib/workspace-service";
+import { workspaceUrl } from "@/lib/workspace-url";
 
 function errorRedirect(req: Request, message: string) {
   const url = new URL("/login", req.url);
@@ -90,7 +91,7 @@ export async function GET(req: Request) {
           }
           await addMemberToWorkspace(workspace.id, userId, "employee");
         }
-        redirectPath = `/${workspace.slug}`;
+        redirectPath = workspaceUrl(workspace.slug);
       }
     }
 

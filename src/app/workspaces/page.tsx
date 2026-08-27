@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
+import { workspaceUrl } from "@/lib/workspace-url";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -26,7 +27,7 @@ export default async function WorkspacesPage() {
     .where(eq(schema.workspaceMembers.userId, user.id));
 
   if (memberships.length === 1) {
-    redirect(`/${memberships[0]!.workspace.slug}`);
+    redirect(workspaceUrl(memberships[0]!.workspace.slug));
   }
 
   return (
@@ -41,7 +42,7 @@ export default async function WorkspacesPage() {
 
       <div className="mt-8 space-y-3">
         {memberships.map(({ workspace, role }) => (
-          <Link key={workspace.id} href={`/${workspace.slug}`}>
+          <Link key={workspace.id} href={workspaceUrl(workspace.slug)}>
             <Card className="group transition-all hover:-translate-y-0.5 hover:shadow-card-hover">
               <CardContent className="flex items-center justify-between gap-4 p-4">
                 <div className="flex items-center gap-3">

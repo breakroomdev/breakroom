@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Mirrors APP_URL to the client bundle so workspace links/redirects can be
+  // built as absolute subdomain URLs (see src/lib/workspace-url.ts).
+  env: {
+    NEXT_PUBLIC_APP_URL: process.env.APP_URL,
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [

@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
+import { workspaceUrl } from "@/lib/workspace-url";
 
 interface RegisterFormProps {
   invite?: string;
@@ -15,7 +15,6 @@ interface RegisterFormProps {
 }
 
 export function RegisterForm({ invite, inviteWorkspaceName, joinWorkspaceSlug, joinWorkspaceName }: RegisterFormProps) {
-  const router = useRouter();
   const skipWorkspaceName = Boolean(invite || joinWorkspaceSlug);
   const [form, setForm] = React.useState({
     displayName: "",
@@ -59,8 +58,7 @@ export function RegisterForm({ invite, inviteWorkspaceName, joinWorkspaceSlug, j
       }
 
       toast.success("Account created — welcome to Breakroom!");
-      router.push(data.workspaceSlug ? `/${data.workspaceSlug}` : "/workspaces");
-      router.refresh();
+      window.location.href = data.workspaceSlug ? workspaceUrl(data.workspaceSlug) : "/workspaces";
     } catch {
       setError("Couldn't reach the server. Please try again.");
     } finally {

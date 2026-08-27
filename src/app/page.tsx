@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { ArrowRight, Github } from "lucide-react";
 import { getDb, schema } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
+import { workspaceUrl } from "@/lib/workspace-url";
 import { Button } from "@/components/ui/button";
 import { MarketingNavbar } from "@/components/marketing/navbar";
 import { ProductPreview } from "@/components/marketing/product-preview";
@@ -18,7 +19,7 @@ export default async function LandingPage() {
     const membership = await db.query.workspaceMembers.findFirst({ where: eq(schema.workspaceMembers.userId, user.id) });
     if (membership) {
       const workspace = await db.query.workspaces.findFirst({ where: eq(schema.workspaces.id, membership.workspaceId) });
-      if (workspace) redirect(`/${workspace.slug}`);
+      if (workspace) redirect(workspaceUrl(workspace.slug));
     }
     redirect("/workspaces");
   }

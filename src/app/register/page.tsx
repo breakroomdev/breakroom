@@ -7,6 +7,7 @@ import { RegisterForm } from "@/components/auth/register-form";
 import { DiscordButton } from "@/components/auth/discord-button";
 import { WorkspacePicker } from "@/components/auth/workspace-picker";
 import { Avatar } from "@/components/ui/avatar";
+import { workspaceDisplayHost } from "@/lib/workspace-url";
 
 export const metadata = { title: "Create your account" };
 
@@ -42,7 +43,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: { w
               <Avatar name={joinWorkspace.name} src={joinWorkspace.logoUrl} size="sm" />
               <div>
                 <p className="text-sm font-medium leading-tight">{joinWorkspace.name}</p>
-                <p className="text-xs text-muted-foreground">breakroom.app/{joinWorkspace.slug}</p>
+                <p className="text-xs text-muted-foreground">{workspaceDisplayHost(joinWorkspace.slug)}</p>
               </div>
             </div>
             <Link href="/register" className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" aria-label="Search a different workspace">

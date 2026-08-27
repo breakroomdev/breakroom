@@ -7,6 +7,7 @@ import { LoginForm } from "@/components/auth/login-form";
 import { DiscordButton } from "@/components/auth/discord-button";
 import { WorkspacePicker } from "@/components/auth/workspace-picker";
 import { Avatar } from "@/components/ui/avatar";
+import { workspaceUrl, workspaceDisplayHost } from "@/lib/workspace-url";
 
 export const metadata = { title: "Sign in" };
 
@@ -39,7 +40,7 @@ export default async function LoginPage({
   searchParams: { workspace?: string; error?: string; next?: string };
 }) {
   const { passwordEnabled, discordEnabled, workspace, allowSelfRegistration } = await getWorkspaceAuthContext(searchParams.workspace);
-  const redirectTo = searchParams.next ?? (searchParams.workspace ? `/${searchParams.workspace}` : "/workspaces");
+  const redirectTo = searchParams.next ?? (searchParams.workspace ? workspaceUrl(searchParams.workspace) : "/workspaces");
 
   return (
     <AuthShell title={workspace ? "Sign in" : "Welcome back"} subtitle={workspace ? undefined : "Find your workspace, or sign in to see all of yours."}>
@@ -54,7 +55,7 @@ export default async function LoginPage({
               <Avatar name={workspace.name} src={workspace.logoUrl} size="sm" />
               <div>
                 <p className="text-sm font-medium leading-tight">{workspace.name}</p>
-                <p className="text-xs text-muted-foreground">breakroom.app/{workspace.slug}</p>
+                <p className="text-xs text-muted-foreground">{workspaceDisplayHost(workspace.slug)}</p>
               </div>
             </div>
             <Link href="/login" className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" aria-label="Search a different workspace">

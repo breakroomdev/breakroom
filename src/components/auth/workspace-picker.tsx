@@ -6,6 +6,7 @@ import { Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { workspaceDisplayHost } from "@/lib/workspace-url";
 
 interface WorkspaceResult {
   name: string;
@@ -148,7 +149,7 @@ export function WorkspacePicker({ basePath }: { basePath: "/login" | "/register"
                     <Avatar name={w.name} src={w.logoUrl} size="sm" />
                     <div className="min-w-0">
                       <p className="truncate font-medium">{w.name}</p>
-                      <p className="truncate text-xs text-muted-foreground">breakroom.app/{w.slug}</p>
+                      <p className="truncate text-xs text-muted-foreground">{workspaceDisplayHost(w.slug)}</p>
                     </div>
                   </button>
                 </li>

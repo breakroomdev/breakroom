@@ -3,6 +3,7 @@ import { and, eq, gt, isNull } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { hashToken } from "@/lib/auth/tokens";
 import { getCurrentUser } from "@/lib/auth/session";
+import { workspaceUrl } from "@/lib/workspace-url";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { RegisterForm } from "@/components/auth/register-form";
 import { AcceptInviteButton } from "@/components/auth/accept-invite-button";
@@ -35,7 +36,7 @@ export default async function JoinPage({ params }: { params: { token: string } }
     const existing = await db.query.workspaceMembers.findFirst({
       where: and(eq(schema.workspaceMembers.workspaceId, invite.workspaceId), eq(schema.workspaceMembers.userId, user.id)),
     });
-    if (existing) redirect(`/${workspace?.slug}`);
+    if (existing && workspace) redirect(workspaceUrl(workspace.slug));
 
     return (
       <AuthShell title={`Join ${workspace?.name ?? "workspace"}`} subtitle={`You're signed in as ${user.displayName}.`}>
