@@ -289,6 +289,28 @@ export const pollVotes = sqliteTable(
 );
 
 // ─────────────────────────────────────────────────────────────
+// Hub — admin-curated links, opened as an in-page embed or new tab
+// ─────────────────────────────────────────────────────────────
+
+export const hubLinks = sqliteTable(
+  "hub_links",
+  {
+    id: id(),
+    workspaceId: text("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    url: text("url").notNull(),
+    description: text("description"),
+    openMode: text("open_mode", { enum: ["embed", "new_tab"] }).notNull().default("new_tab"),
+    position: integer("position").notNull().default(0),
+    createdBy: text("created_by").notNull().references(() => users.id),
+    ...timestamps,
+  },
+  (t) => ({
+    workspaceIdx: index("hub_links_workspace_idx").on(t.workspaceId, t.position),
+  })
+);
+
+// ─────────────────────────────────────────────────────────────
 // Scheduling
 // ─────────────────────────────────────────────────────────────
 

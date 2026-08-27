@@ -30,6 +30,8 @@ heavyweight than enterprise HR software.
 - **Polls** — single- or multiple-choice, optional expiry, live results with percentage bars,
   duplicate-vote prevention.
 - **Image uploads** — direct-to-Cloudinary uploads with previews, progress, and validation.
+- **Hub** — admins curate a list of links to tools/docs/dashboards; each one opens inline as
+  an in-page embed or in a new tab.
 - **Shift scheduling** — day/week/month calendar views, assign shifts to employees, open/
   unassigned shifts, positions & locations, "my shifts" filter, "upcoming shifts" on the
   dashboard.

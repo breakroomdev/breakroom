@@ -8,6 +8,13 @@
       "when": 1787743146654,
       "tag": "0000_lowly_azazel",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1787824354287,
+      "tag": "0001_freezing_mongu",
+      "breakpoints": true
     }
   ]
 }

@@ -10,6 +10,7 @@ const TABS: { label: string; href: string; permission: Permission }[] = [
   { label: "Members", href: "/members", permission: "members.manage" },
   { label: "Roles", href: "/roles", permission: "roles.manage" },
   { label: "Schedule", href: "/schedule", permission: "schedule.manage" },
+  { label: "Hub", href: "/hub", permission: "workspace.manage" },
   { label: "Workspace", href: "/workspace", permission: "workspace.manage" },
   { label: "Authentication", href: "/auth", permission: "workspace.manage" },
   { label: "Moderation", href: "/moderation", permission: "posts.moderate" },
