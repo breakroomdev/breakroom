@@ -16,4 +16,6 @@ export const RESERVED_SLUGS = new Set([
   "public",
   "assets",
   "search",
+  "terms",
+  "privacy",
 ]);

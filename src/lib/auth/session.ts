@@ -7,6 +7,10 @@ import { generateToken, hashToken } from "./tokens";
 export const SESSION_COOKIE = "breakroom_session";
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
+// Set to e.g. ".breakroom.team" to share sessions across workspace subdomains.
+// Leave unset for path-based deployments (default host-only cookie).
+const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || undefined;
+
 export type SessionUser = typeof schema.users.$inferSelect;
 
 export async function createSession(userId: string): Promise<string> {
@@ -30,6 +34,7 @@ export async function createSession(userId: string): Promise<string> {
     sameSite: "lax",
     path: "/",
     maxAge: SESSION_TTL_MS / 1000,
+    domain: COOKIE_DOMAIN,
   });
 
   return token;
@@ -37,7 +42,7 @@ export async function createSession(userId: string): Promise<string> {
 
 export async function destroySession(): Promise<void> {
   const token = cookies().get(SESSION_COOKIE)?.value;
-  cookies().delete(SESSION_COOKIE);
+  cookies().delete({ name: SESSION_COOKIE, path: "/", domain: COOKIE_DOMAIN });
   if (!token) return;
 
   const db = await getDb();

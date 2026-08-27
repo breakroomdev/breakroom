@@ -37,6 +37,12 @@ export function MarketingFooter() {
           <a href="https://github.com/breakroomdev/breakroom" target="_blank" rel="noreferrer" className="hover:text-foreground">
             GitHub
           </a>
+          <Link href="/terms" className="hover:text-foreground">
+            Terms
+          </Link>
+          <Link href="/privacy" className="hover:text-foreground">
+            Privacy
+          </Link>
           <Link href="/login" className="hover:text-foreground">
             Sign in
           </Link>

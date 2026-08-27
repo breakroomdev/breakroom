@@ -200,6 +200,22 @@ Cloudflare, and libSQL everywhere else — no code changes needed between enviro
    ```
 5. Deploy. Vercel builds with `next build` automatically; no extra configuration needed.
 
+## Workspace subdomains (optional)
+
+Breakroom can serve each workspace on its own subdomain (`acme.yourdomain.com`) instead of a
+path prefix (`yourdomain.com/acme`) — both work at the same time, no separate deploy needed.
+
+1. Point a wildcard DNS record at your deployment: `*.yourdomain.com` → your host (an `A`/`ALIAS`
+   record on Vercel, or a wildcard entry on whatever's in front of your server elsewhere).
+2. Set `APP_URL=https://yourdomain.com` (the root domain) — `src/middleware.ts` uses it to
+   recognize which incoming hosts are workspace subdomains.
+3. Optionally set `COOKIE_DOMAIN=.yourdomain.com` so signing in on one workspace subdomain keeps
+   you signed in on others too. Leave it unset and cookies stay host-only (fine for a single
+   workspace, or for purely path-based use).
+
+Visiting `acme.yourdomain.com` transparently rewrites to the same `/acme/...` routes used by
+path-based URLs — nothing about the app's routes or links needs to change.
+
 ## Other Node hosting (self-hosted server, Docker, etc.)
 
 Breakroom is a standard Next.js app — `npm run build && npm run start` works anywhere Node 20+
