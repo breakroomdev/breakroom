@@ -1,13 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { CalendarDays, Rss, BarChart3, Users, ArrowRight, Clock } from "lucide-react";
+import { CalendarDays, Rss, BarChart3, Users, ArrowRight, Clock, Pin } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getMembership } from "@/lib/auth/authorize";
 import { getUpcomingShifts, getPinnedPosts, getWorkspaceStats } from "@/lib/services/dashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { formatDate, formatTime } from "@/lib/utils";
+import { cn, formatDate, formatTime } from "@/lib/utils";
 import { getWorkspaceBasePath } from "@/lib/workspace-base-path";
 
 export const metadata = { title: "Home" };
@@ -41,15 +40,20 @@ export default async function DashboardPage({ params }: { params: { workspaceSlu
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard icon={Users} label="Active members" value={stats.members} />
-        <StatCard icon={Rss} label="Posts this week" value={stats.postsThisWeek} />
-        <StatCard icon={CalendarDays} label="Upcoming shifts" value={stats.upcomingShifts} />
+        <StatCard icon={Users} label="Active members" value={stats.members} tone="primary" />
+        <StatCard icon={Rss} label="Posts this week" value={stats.postsThisWeek} tone="accent" />
+        <StatCard icon={CalendarDays} label="Upcoming shifts" value={stats.upcomingShifts} tone="warning" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-3">
           <CardHeader className="flex-row items-center justify-between space-y-0">
-            <CardTitle>Pinned posts</CardTitle>
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300">
+                <Pin className="h-4 w-4" />
+              </div>
+              <CardTitle>Pinned posts</CardTitle>
+            </div>
             <Link href={`${basePath}/feed`} className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
               Go to feed <ArrowRight className="h-3.5 w-3.5" />
             </Link>
@@ -72,7 +76,12 @@ export default async function DashboardPage({ params }: { params: { workspaceSlu
 
         <Card className="lg:col-span-2">
           <CardHeader className="flex-row items-center justify-between space-y-0">
-            <CardTitle>Your upcoming shifts</CardTitle>
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-warning/15 text-warning-strong">
+                <CalendarDays className="h-4 w-4" />
+              </div>
+              <CardTitle>Your shifts</CardTitle>
+            </div>
             <Link href={`${basePath}/schedule`} className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
               Schedule <ArrowRight className="h-3.5 w-3.5" />
             </Link>
@@ -104,36 +113,72 @@ export default async function DashboardPage({ params }: { params: { workspaceSlu
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <QuickLink href={`${basePath}/polls`} icon={BarChart3} label="Create a poll" description="Get quick input from the team" />
-        <QuickLink href={`${basePath}/team`} icon={Users} label="Team directory" description="See who's who" />
-        <QuickLink href={`${basePath}/schedule`} icon={CalendarDays} label="View schedule" description="Check coverage this week" />
+        <QuickLink href={`${basePath}/polls`} icon={BarChart3} label="Create a poll" description="Get quick input from the team" tone="primary" />
+        <QuickLink href={`${basePath}/team`} icon={Users} label="Team directory" description="See who's who" tone="accent" />
+        <QuickLink href={`${basePath}/schedule`} icon={CalendarDays} label="View schedule" description="Check coverage this week" tone="warning" />
       </div>
     </div>
   );
 }
 
-function StatCard({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>; label: string; value: number }) {
+type Tone = "primary" | "accent" | "warning";
+
+const TONE_STYLES: Record<Tone, string> = {
+  primary: "bg-primary-100 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300",
+  accent: "bg-accent/15 text-accent-foreground",
+  warning: "bg-warning/15 text-warning-strong",
+};
+
+const TONE_HOVER: Record<Tone, string> = {
+  primary: "group-hover:bg-primary group-hover:text-primary-foreground",
+  accent: "group-hover:bg-accent group-hover:text-accent-foreground",
+  warning: "group-hover:bg-warning group-hover:text-warning-foreground",
+};
+
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: number;
+  tone: Tone;
+}) {
   return (
     <Card>
-      <CardContent className="flex items-center gap-3 p-4">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-brand-soft text-primary">
+      <CardContent className="flex items-center gap-4 p-4">
+        <div className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl", TONE_STYLES[tone])}>
           <Icon className="h-5 w-5" />
         </div>
         <div>
-          <p className="font-display text-xl font-bold leading-none">{value}</p>
-          <p className="text-sm text-muted-foreground">{label}</p>
+          <p className="font-display text-2xl font-bold leading-none">{value}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{label}</p>
         </div>
       </CardContent>
     </Card>
   );
 }
 
-function QuickLink({ href, icon: Icon, label, description }: { href: string; icon: React.ComponentType<{ className?: string }>; label: string; description: string }) {
+function QuickLink({
+  href,
+  icon: Icon,
+  label,
+  description,
+  tone,
+}: {
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  description: string;
+  tone: Tone;
+}) {
   return (
     <Link href={href} className="group">
       <Card className="h-full transition-all hover:-translate-y-0.5 hover:shadow-card-hover">
         <CardContent className="flex items-center gap-3 p-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+          <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors", TONE_STYLES[tone], TONE_HOVER[tone])}>
             <Icon className="h-[18px] w-[18px]" />
           </div>
           <div className="min-w-0">
