@@ -16,14 +16,15 @@ export default async function AdminMembersPage({ params }: { params: { workspace
   requirePermission(membership, "members.manage");
 
   const db = await getDb();
-  const rows = await db
-    .select({ member: schema.workspaceMembers, user: schema.users, role: schema.roles })
-    .from(schema.workspaceMembers)
-    .innerJoin(schema.users, eq(schema.users.id, schema.workspaceMembers.userId))
-    .innerJoin(schema.roles, eq(schema.roles.id, schema.workspaceMembers.roleId))
-    .where(eq(schema.workspaceMembers.workspaceId, membership.workspace.id));
-
-  const roles = await db.query.roles.findMany({ where: eq(schema.roles.workspaceId, membership.workspace.id) });
+  const [rows, roles] = await Promise.all([
+    db
+      .select({ member: schema.workspaceMembers, user: schema.users, role: schema.roles })
+      .from(schema.workspaceMembers)
+      .innerJoin(schema.users, eq(schema.users.id, schema.workspaceMembers.userId))
+      .innerJoin(schema.roles, eq(schema.roles.id, schema.workspaceMembers.roleId))
+      .where(eq(schema.workspaceMembers.workspaceId, membership.workspace.id)),
+    db.query.roles.findMany({ where: eq(schema.roles.workspaceId, membership.workspace.id) }),
+  ]);
 
   const members = rows.map((r) => ({
     id: r.member.id,

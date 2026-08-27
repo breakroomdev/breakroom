@@ -89,7 +89,7 @@ drizzle/               Generated SQL migrations
 Requirements: Node.js 20+.
 
 ```bash
-git clone https://github.com/breakroom/breakroom.git
+git clone https://github.com/breakroomdev/breakroom.git
 cd breakroom
 npm install
 cp .env.example .env          # then fill in SESSION_SECRET at minimum

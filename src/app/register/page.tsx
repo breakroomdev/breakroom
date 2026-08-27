@@ -61,7 +61,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: { w
         )}
 
         {joinWorkspace && !joinWorkspace.allowSelfRegistration ? (
-          <p className="rounded-lg bg-warning/15 px-3 py-2.5 text-sm text-warning-foreground">
+          <p className="rounded-lg bg-warning/15 px-3 py-2.5 text-sm text-warning-strong">
             {joinWorkspace.name} requires an invite to join. Ask a workspace admin to send you one, or{" "}
             <Link href="/register" className="font-medium underline">
               start your own workspace

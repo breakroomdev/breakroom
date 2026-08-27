@@ -68,7 +68,7 @@ export function ImageUploader({ value, onChange, max = 6 }: ImageUploaderProps) 
       <div className="flex flex-wrap gap-3">
         {value.map((img) => (
           <div key={img.publicId} className="group relative h-24 w-24 overflow-hidden rounded-xl border border-border">
-            <Image src={img.url} alt="" fill sizes="96px" className="object-cover" />
+            <Image src={img.url} alt="Photo attached to your post" fill sizes="96px" className="object-cover" />
             <button
               type="button"
               onClick={() => removeUploaded(img.publicId)}
@@ -83,7 +83,7 @@ export function ImageUploader({ value, onChange, max = 6 }: ImageUploaderProps) 
         {pending.map((img) => (
           <div key={img.id} className="relative h-24 w-24 overflow-hidden rounded-xl border border-border">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={img.previewUrl} alt="" className="h-full w-full object-cover" />
+            <img src={img.previewUrl} alt="Uploading photo" className="h-full w-full object-cover" />
             {img.error ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-destructive/90 p-1.5 text-center">
                 <p className="text-[10px] font-medium leading-tight text-white">{img.error}</p>

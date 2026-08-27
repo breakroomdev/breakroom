@@ -16,7 +16,7 @@ export function CTASection() {
               <Link href="/register">Get started free</Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="border-white/40 text-white hover:bg-white/10">
-              <a href="https://github.com" target="_blank" rel="noreferrer">
+              <a href="https://github.com/breakroomdev/breakroom" target="_blank" rel="noreferrer">
                 <Github className="h-4 w-4" /> View on GitHub
               </a>
             </Button>
@@ -34,7 +34,7 @@ export function MarketingFooter() {
         <Logo />
         <p className="text-sm text-muted-foreground">MIT licensed · Free & open source</p>
         <div className="flex gap-4 text-sm text-muted-foreground">
-          <a href="https://github.com" target="_blank" rel="noreferrer" className="hover:text-foreground">
+          <a href="https://github.com/breakroomdev/breakroom" target="_blank" rel="noreferrer" className="hover:text-foreground">
             GitHub
           </a>
           <Link href="/login" className="hover:text-foreground">

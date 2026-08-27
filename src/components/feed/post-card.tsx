@@ -163,7 +163,7 @@ export function PostCard({ post, onChange, onRemove }: { post: FeedPost; onChang
           post.content && <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed">{post.content}</p>
         )}
 
-        {post.images.length > 0 ? <PostImageGrid images={post.images} /> : null}
+        {post.images.length > 0 ? <PostImageGrid images={post.images} authorName={post.author.displayName} /> : null}
 
         {post.type === "poll" && post.poll ? <PollVoteCard post={post} onUpdated={onChange} /> : null}
 
@@ -188,7 +188,7 @@ export function PostCard({ post, onChange, onRemove }: { post: FeedPost; onChang
   );
 }
 
-function PostImageGrid({ images }: { images: FeedPost["images"] }) {
+function PostImageGrid({ images, authorName }: { images: FeedPost["images"]; authorName: string }) {
   const count = images.length;
   return (
     <div
@@ -201,7 +201,13 @@ function PostImageGrid({ images }: { images: FeedPost["images"] }) {
     >
       {images.slice(0, 4).map((img, i) => (
         <div key={img.id} className={cn("relative overflow-hidden bg-muted", count === 1 ? "aspect-video" : "aspect-square", count === 3 && i === 0 && "row-span-2 aspect-auto")}>
-          <Image src={img.url} alt="" fill sizes="(max-width: 640px) 100vw, 600px" className="object-cover transition-transform duration-300 hover:scale-[1.02]" />
+          <Image
+            src={img.url}
+            alt={count > 1 ? `Photo ${i + 1} of ${count} from ${authorName}'s post` : `Photo from ${authorName}'s post`}
+            fill
+            sizes="(max-width: 640px) 100vw, 600px"
+            className="object-cover transition-transform duration-300 hover:scale-[1.02]"
+          />
           {count > 4 && i === 3 ? (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 font-display text-lg font-semibold text-white">+{count - 4}</div>
           ) : null}

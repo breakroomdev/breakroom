@@ -12,7 +12,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 25% 13%;
     --muted: 220 16% 95%;
-    --muted-foreground: 220 9% 45%;
+    --muted-foreground: 220 11% 37%;
     --secondary: 220 16% 95%;
     --secondary-foreground: 222 20% 18%;
     --border: 220 15% 89%;
@@ -23,6 +23,10 @@
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
     --warning-foreground: 26 45% 14%;
+    /* Readable amber "ink" for warning text on a tinted/translucent surface
+       (e.g. bg-warning/15 banners) — distinct from --warning-foreground,
+       which is calibrated for text on a *solid* --warning fill instead. */
+    --warning-strong: 26 85% 32%;
     --radius: 0.875rem;
 
     /* ── Breakroom Default theme (also the fallback) ────────────── */
@@ -153,6 +157,13 @@
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 56%;
     --warning-foreground: 26 40% 12%;
+    --warning-strong: 40 95% 72%;
+    /* Only the default theme's --accent-foreground (20 60% 15%, a dark
+       brown meant for solid-accent fills) is unreadable on a translucent
+       bg-accent/15 badge against a dark page background. The other six
+       workspace themes already use white here, so this override is a
+       no-op for them and only fixes the default theme in dark mode. */
+    --accent-foreground: 0 0% 100%;
 
     --primary-500: 166 62% 50%;
     --primary-600: 166 66% 42%;
@@ -240,6 +251,23 @@
     border: 2px solid transparent;
     background-clip: content-box;
   }
+
+  /* Respect the OS-level "reduce motion" preference: kill decorative
+     animation/transition/smooth-scroll for anyone who's asked for it,
+     without touching functionality. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer utilities {
@@ -260,5 +288,11 @@
 
   .bg-gradient-brand-soft {
     background-image: linear-gradient(135deg, hsl(var(--primary-50)), hsl(var(--accent) / 0.12));
+  }
+
+  /* Visually hidden until focused — for "skip to content" links. */
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100];
+    @apply focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2.5 focus:text-sm focus:font-medium focus:text-primary-foreground focus:shadow-popover;
   }
 }

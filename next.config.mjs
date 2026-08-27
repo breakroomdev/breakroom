@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
         protocol: "https",
@@ -19,6 +20,11 @@ const nextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: true,
+  },
+  // Trims unused exports from these packages at build time instead of
+  // bundling the whole module — smaller client JS, faster cold builds.
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
   },
 };
 

@@ -87,7 +87,7 @@ export function OpenSourceSection() {
             <span className="h-2.5 w-2.5 rounded-full bg-success/60" />
           </div>
           <p className="text-muted-foreground">
-            <span className="text-primary">$</span> git clone github.com/breakroom/breakroom
+            <span className="text-primary">$</span> git clone github.com/breakroomdev/breakroom
           </p>
           <p className="text-muted-foreground">
             <span className="text-primary">$</span> cd breakroom &amp;&amp; npm install

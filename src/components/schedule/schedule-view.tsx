@@ -165,16 +165,26 @@ function MonthGrid({
           return (
             <div
               key={date}
-              onClick={() => onDayClick(date)}
               className={cn(
-                "min-h-[96px] border-b border-r border-border p-1.5 last:border-r-0",
-                !inMonth && "bg-muted/20 text-muted-foreground/60",
-                canManage && "cursor-pointer hover:bg-muted/40"
+                "group min-h-[96px] border-b border-r border-border p-1.5 last:border-r-0",
+                !inMonth && "bg-muted/20 text-muted-foreground/60"
               )}
             >
-              <span className={cn("flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium", isToday(date, today) && "bg-primary text-primary-foreground")}>
-                {Number(date.slice(-2))}
-              </span>
+              <div className="flex items-center justify-between">
+                <span className={cn("flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium", isToday(date, today) && "bg-primary text-primary-foreground")}>
+                  {Number(date.slice(-2))}
+                </span>
+                {canManage ? (
+                  <button
+                    type="button"
+                    onClick={() => onDayClick(date)}
+                    aria-label={`Add a shift on ${formatDate(date, { weekday: "long", month: "long", day: "numeric" })}`}
+                    className="rounded p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-primary focus-visible:opacity-100 group-hover:opacity-100"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </button>
+                ) : null}
+              </div>
               <div className="mt-1 space-y-1">
                 {dayShifts.slice(0, 3).map((shift) => (
                   <button
@@ -224,7 +234,12 @@ function WeekGrid({
             <div className={cn("flex items-center justify-between border-b border-border px-3 py-2", isToday(date, today) && "bg-primary-50 dark:bg-primary-500/10")}>
               <p className="text-sm font-semibold">{formatDate(date, { weekday: "short", day: "numeric" })}</p>
               {canManage ? (
-                <button onClick={() => onDayClick(date)} className="text-muted-foreground hover:text-primary">
+                <button
+                  type="button"
+                  onClick={() => onDayClick(date)}
+                  aria-label={`Add a shift on ${formatDate(date, { weekday: "long", month: "long", day: "numeric" })}`}
+                  className="text-muted-foreground hover:text-primary"
+                >
                   <Plus className="h-3.5 w-3.5" />
                 </button>
               ) : null}

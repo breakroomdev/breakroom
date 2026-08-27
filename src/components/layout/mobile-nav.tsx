@@ -17,7 +17,7 @@ export function MobileBottomNav({ workspaceSlug, isAdmin }: { workspaceSlug: str
 
   return (
     <>
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-border bg-card/95 backdrop-blur pb-[env(safe-area-inset-bottom)] lg:hidden">
+      <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-border bg-card/95 backdrop-blur pb-[env(safe-area-inset-bottom)] lg:hidden">
         {BOTTOM_ITEMS.map((item) => {
           const href = `/${workspaceSlug}${item.href}`;
           const isActive = item.href === "" ? pathname === href : pathname.startsWith(href);
@@ -46,7 +46,7 @@ export function MobileBottomNav({ workspaceSlug, isAdmin }: { workspaceSlug: str
             <DialogPrimitive.Title className="sr-only">Menu</DialogPrimitive.Title>
             <div className="mb-4 flex items-center justify-between">
               <Logo />
-              <DialogPrimitive.Close className="rounded-md p-1.5 hover:bg-muted">
+              <DialogPrimitive.Close aria-label="Close menu" className="rounded-md p-1.5 hover:bg-muted">
                 <X className="h-5 w-5" />
               </DialogPrimitive.Close>
             </div>

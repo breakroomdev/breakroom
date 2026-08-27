@@ -6,7 +6,7 @@ we'd love your help making it better.
 ## Getting set up
 
 ```bash
-git clone https://github.com/breakroom/breakroom.git
+git clone https://github.com/breakroomdev/breakroom.git
 cd breakroom
 npm install
 cp .env.example .env

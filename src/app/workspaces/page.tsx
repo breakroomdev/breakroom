@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Logo } from "@/components/brand/logo";
+import { WorkspaceLogo } from "@/components/brand/workspace-logo";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { Plus, ArrowRight } from "lucide-react";
 
@@ -44,9 +45,7 @@ export default async function WorkspacesPage() {
             <Card className="group transition-all hover:-translate-y-0.5 hover:shadow-card-hover">
               <CardContent className="flex items-center justify-between gap-4 p-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-brand font-display text-lg font-bold text-white">
-                    {workspace.name.slice(0, 1).toUpperCase()}
-                  </div>
+                  <WorkspaceLogo name={workspace.name} logoUrl={workspace.logoUrl} size="lg" />
                   <div>
                     <p className="font-medium">{workspace.name}</p>
                     <p className="text-sm capitalize text-muted-foreground">{role.name}</p>

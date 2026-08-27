@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { useWorkspace } from "@/components/workspace-context";
@@ -39,6 +39,7 @@ export function MediaGallery({ initialItems, initialCursor }: { initialItems: Me
           <button
             key={item.id}
             onClick={() => setActive(item)}
+            aria-label={`View photo from ${item.author.displayName}'s post, enlarged`}
             className="group relative aspect-square overflow-hidden rounded-xl bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Image src={item.url} alt="" fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover transition-transform duration-300 group-hover:scale-105" />
@@ -56,9 +57,10 @@ export function MediaGallery({ initialItems, initialCursor }: { initialItems: Me
 
       <Dialog open={!!active} onOpenChange={(open) => !open && setActive(null)}>
         <DialogContent className="max-w-3xl p-2">
+          <DialogTitle className="sr-only">{active ? `Photo from ${active.author.displayName}'s post` : "Photo preview"}</DialogTitle>
           {active ? (
             <div className="relative aspect-video w-full overflow-hidden rounded-xl">
-              <Image src={active.url} alt="" fill sizes="100vw" className="object-contain" />
+              <Image src={active.url} alt={`Photo from ${active.author.displayName}'s post`} fill sizes="100vw" className="object-contain" />
             </div>
           ) : null}
         </DialogContent>

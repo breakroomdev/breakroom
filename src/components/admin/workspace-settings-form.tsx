@@ -148,7 +148,7 @@ function WorkspaceSlugForm({ currentSlug }: { currentSlug: string }) {
         </Field>
 
         {changed ? (
-          <p className="flex items-start gap-2 rounded-lg bg-warning/15 px-3 py-2 text-sm text-warning-foreground">
+          <p className="flex items-start gap-2 rounded-lg bg-warning/15 px-3 py-2 text-sm text-warning-strong">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>
               This will change your workspace address to <strong>breakroom.app/{normalized || "…"}</strong>. Any

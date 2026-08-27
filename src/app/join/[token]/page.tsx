@@ -26,8 +26,10 @@ export default async function JoinPage({ params }: { params: { token: string } }
     );
   }
 
-  const workspace = await db.query.workspaces.findFirst({ where: eq(schema.workspaces.id, invite.workspaceId) });
-  const user = await getCurrentUser();
+  const [workspace, user] = await Promise.all([
+    db.query.workspaces.findFirst({ where: eq(schema.workspaces.id, invite.workspaceId) }),
+    getCurrentUser(),
+  ]);
 
   if (user) {
     const existing = await db.query.workspaceMembers.findFirst({
