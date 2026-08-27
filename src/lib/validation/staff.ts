@@ -1,7 +1,9 @@
 import { z } from "zod";
+import { slugSchema } from "@/lib/validation/workspace";
 
-export const setWorkspaceVerifiedSchema = z.object({
-  verified: z.boolean(),
+export const updateWorkspaceAsStaffSchema = z.object({
+  verified: z.boolean().optional(),
+  slug: slugSchema.optional(),
 });
 
 export const createAnnouncementSchema = z.object({

@@ -22,10 +22,10 @@ export function AuthShell({
             Your workplace, in one place.
           </p>
           <p className="text-white/85">
-            Announcements, polls, schedules and team updates — one open-source home for how your team stays in sync.
+            Announcements, polls, schedules and team updates — one home for how your team stays in sync.
           </p>
         </div>
-        <p className="relative z-10 text-sm text-white/70">Free, open source, and yours to self-host.</p>
+        <p className="relative z-10 text-sm text-white/70">Built for modern teams.</p>
       </div>
 
       <div className="flex flex-col items-center justify-center px-6 py-12">

@@ -12,7 +12,7 @@ export interface TeamMember {
   department: string | null;
   pronouns: string | null;
   phone: string | null;
-  email: string;
+  email: string | null;
   status: "active" | "disabled";
   role: { key: string; name: string };
 }
@@ -38,7 +38,7 @@ export async function listTeamMembers(workspaceId: string): Promise<TeamMember[]
       department: r.user.department,
       pronouns: r.user.pronouns,
       phone: r.user.phone,
-      email: r.user.email,
+      email: r.user.hideEmail ? null : r.user.email,
       status: r.member.status,
       role: { key: r.role.key, name: r.role.name },
     }))

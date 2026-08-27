@@ -43,6 +43,7 @@ export const updateProfileSchema = z.object({
   department: z.string().max(120).optional().nullable(),
   pronouns: z.string().max(40).optional().nullable(),
   phone: z.string().max(40).optional().nullable(),
+  hideEmail: z.boolean().optional(),
   colorMode: z.enum(["light", "dark", "system"]).optional(),
   themeOverride: z.enum(WORKSPACE_THEMES).nullable().optional(),
 });

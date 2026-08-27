@@ -15,10 +15,8 @@ export default function TermsPage() {
           <section>
             <h2 className="font-display text-lg font-semibold text-foreground">1. What Breakroom is</h2>
             <p className="mt-2">
-              Breakroom is an open-source workplace communication platform. This deployment is a hosted instance of that
-              software, provided as-is, for use by the workspaces and members invited to it. Breakroom is also freely
-              available as open-source software that anyone can self-host under its own terms — the terms below apply
-              only to this particular hosted instance.
+              Breakroom is a workplace communication platform, provided as-is, for use by the workspaces and members
+              invited to it.
             </p>
           </section>
 

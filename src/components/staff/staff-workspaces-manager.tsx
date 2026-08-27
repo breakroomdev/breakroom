@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { toast } from "sonner";
-import { Search, Trash2, BadgeCheck, Circle } from "lucide-react";
+import { Search, Trash2, BadgeCheck, Circle, Pencil } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,8 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { WorkspaceLogo } from "@/components/brand/workspace-logo";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
-import { formatDate } from "@/lib/utils";
-import { workspaceDisplayHost } from "@/lib/workspace-url";
+import { cn, formatDate, slugify } from "@/lib/utils";
+import { workspaceDisplayHost, rootDisplayHost } from "@/lib/workspace-url";
 
 interface StaffWorkspace {
   id: string;
@@ -30,6 +30,7 @@ export function StaffWorkspacesManager({ initialWorkspaces }: { initialWorkspace
   const [query, setQuery] = React.useState("");
   const [pendingVerify, setPendingVerify] = React.useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = React.useState<StaffWorkspace | null>(null);
+  const [editTarget, setEditTarget] = React.useState<StaffWorkspace | null>(null);
 
   const filtered = workspaces.filter((w) => {
     const q = query.trim().toLowerCase();
@@ -90,6 +91,9 @@ export function StaffWorkspacesManager({ initialWorkspaces }: { initialWorkspace
                 {w.verified ? <Circle className="h-3.5 w-3.5" /> : <BadgeCheck className="h-3.5 w-3.5" />}
                 {w.verified ? "Unverify" : "Verify"}
               </Button>
+              <Button variant="ghost" size="icon-sm" aria-label={`Change domain for ${w.name}`} onClick={() => setEditTarget(w)}>
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
               <Button variant="ghost" size="icon-sm" aria-label={`Delete ${w.name}`} onClick={() => setDeleteTarget(w)}>
                 <Trash2 className="h-3.5 w-3.5 text-destructive" />
               </Button>
@@ -105,7 +109,92 @@ export function StaffWorkspacesManager({ initialWorkspaces }: { initialWorkspace
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         onDeleted={(id) => setWorkspaces((prev) => prev.filter((w) => w.id !== id))}
       />
+
+      <EditDomainDialog
+        workspace={editTarget}
+        onOpenChange={(open) => !open && setEditTarget(null)}
+        onChanged={(id, slug) => setWorkspaces((prev) => prev.map((w) => (w.id === id ? { ...w, slug } : w)))}
+      />
     </div>
+  );
+}
+
+function EditDomainDialog({
+  workspace,
+  onOpenChange,
+  onChanged,
+}: {
+  workspace: StaffWorkspace | null;
+  onOpenChange: (open: boolean) => void;
+  onChanged: (id: string, slug: string) => void;
+}) {
+  const [slug, setSlug] = React.useState("");
+  const [saving, setSaving] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const rootHost = rootDisplayHost();
+
+  React.useEffect(() => {
+    setSlug(workspace?.slug ?? "");
+    setError(null);
+  }, [workspace]);
+
+  const normalized = slugify(slug);
+  const changed = !!workspace && normalized !== workspace.slug;
+
+  async function save() {
+    if (!workspace || !normalized || !changed) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/staff/workspaces/${workspace.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: normalized }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error?.message ?? "Couldn't change the workspace URL.");
+        return;
+      }
+      toast.success("Workspace URL updated");
+      onChanged(workspace.id, normalized);
+      onOpenChange(false);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Dialog open={!!workspace} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Change domain for {workspace?.name}</DialogTitle>
+          <DialogDescription>Overrides this workspace's URL directly — its own admins can also do this themselves.</DialogDescription>
+        </DialogHeader>
+        <Field label="URL" htmlFor="staff-slug">
+          <div className="flex items-center rounded-lg border border-input bg-card shadow-sm focus-within:ring-2 focus-within:ring-ring">
+            {rootHost ? null : <span className="pl-3 text-sm text-muted-foreground">/</span>}
+            <Input
+              id="staff-slug"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              className={cn("h-10 flex-1 border-0 shadow-none focus-visible:ring-0", rootHost ? "pl-3" : "pr-3")}
+              maxLength={48}
+            />
+            {rootHost ? <span className="pr-3 text-sm text-muted-foreground">.{rootHost}</span> : null}
+          </div>
+        </Field>
+        {error ? <p className="text-sm font-medium text-destructive">{error}</p> : null}
+        <DialogFooter>
+          <Button variant="secondary" onClick={() => onOpenChange(false)} disabled={saving}>
+            Cancel
+          </Button>
+          <Button onClick={save} disabled={!normalized || !changed} loading={saving}>
+            Save
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

@@ -1,4 +1,4 @@
-import { Rss, BarChart3, CalendarDays, Users, Palette, Github, ServerCog } from "lucide-react";
+import { Rss, BarChart3, CalendarDays, Users, Palette, LayoutGrid, UserCheck, Shuffle } from "lucide-react";
 
 const FEATURES = [
   {
@@ -22,14 +22,14 @@ const FEATURES = [
     description: "Photos, roles, departments and contact info — so new hires know who's who from day one.",
   },
   {
+    icon: LayoutGrid,
+    title: "One hub for your tools",
+    description: "Curate the links your team uses every day — docs, dashboards, trackers — in one place, opened inline.",
+  },
+  {
     icon: Palette,
     title: "Themes that fit your brand",
     description: "Seven color themes plus light, dark and system mode. Set a default, let people personalize.",
-  },
-  {
-    icon: ServerCog,
-    title: "Self-host in minutes",
-    description: "Deploy to Cloudflare or Vercel with one command, or run it on your own server.",
   },
 ];
 
@@ -58,50 +58,47 @@ export function FeatureGrid() {
   );
 }
 
-export function OpenSourceSection() {
+const STEPS = [
+  {
+    icon: UserCheck,
+    title: "Create your workspace",
+    description: "Set it up in a couple of minutes — name it, pick a theme, and it's ready.",
+  },
+  {
+    icon: Shuffle,
+    title: "Invite your team",
+    description: "Send invite links or open self-serve sign-up. Set roles and permissions as you go.",
+  },
+  {
+    icon: Rss,
+    title: "Everyone's on the same page",
+    description: "Posts, schedules, polls and your team's tools — all in the place people actually check.",
+  },
+];
+
+export function HowItWorksSection() {
   return (
-    <section id="open-source" className="mx-auto max-w-6xl px-6 py-24">
-      <div className="grid items-center gap-10 rounded-3xl border border-border bg-gradient-brand-soft p-10 lg:grid-cols-2 lg:p-16">
-        <div>
-          <p className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-700 dark:text-primary-300">
-            <Github className="h-3.5 w-3.5" /> Free & open source
-          </p>
-          <h2 className="font-display text-3xl font-bold tracking-tight text-balance">Yours to run, fork and extend</h2>
-          <p className="mt-3 text-muted-foreground">
-            Breakroom is MIT-licensed and built to be self-hosted. Deploy it on Cloudflare Workers, Vercel, or your own
-            server — no proprietary backend required, no per-seat pricing, no lock-in.
-          </p>
-          <ul className="mt-5 space-y-2 text-sm">
-            {["Clone the repo and run it locally in minutes", "Deploy to Cloudflare or Vercel with one command", "Bring your own Cloudinary and Discord app credentials"].map((item) => (
-              <li key={item} className="flex items-center gap-2">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">✓</span>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-5 font-mono text-sm shadow-card">
-          <div className="mb-3 flex gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-destructive/60" />
-            <span className="h-2.5 w-2.5 rounded-full bg-warning/60" />
-            <span className="h-2.5 w-2.5 rounded-full bg-success/60" />
+    <section id="how-it-works" className="mx-auto max-w-6xl px-6 py-24">
+      <div className="mx-auto mb-14 max-w-2xl text-center">
+        <p className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-700 dark:bg-primary-500/15 dark:text-primary-300">
+          Get started fast
+        </p>
+        <h2 className="font-display text-3xl font-bold tracking-tight text-balance sm:text-4xl">Up and running today</h2>
+        <p className="mt-3 text-muted-foreground">No IT ticket, no lengthy rollout — your team can be in Breakroom this afternoon.</p>
+      </div>
+      <div className="grid gap-6 sm:grid-cols-3">
+        {STEPS.map((s, i) => (
+          <div key={s.title} className="relative rounded-2xl border border-border bg-card p-6 shadow-card">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-brand-soft text-primary">
+                <s.icon className="h-5 w-5" />
+              </div>
+              <span className="font-display text-sm font-semibold text-muted-foreground">Step {i + 1}</span>
+            </div>
+            <h3 className="font-display text-base font-semibold">{s.title}</h3>
+            <p className="mt-1.5 text-sm text-muted-foreground">{s.description}</p>
           </div>
-          <p className="text-muted-foreground">
-            <span className="text-primary">$</span> git clone github.com/breakroomdev/breakroom
-          </p>
-          <p className="text-muted-foreground">
-            <span className="text-primary">$</span> cd breakroom &amp;&amp; npm install
-          </p>
-          <p className="text-muted-foreground">
-            <span className="text-primary">$</span> cp .env.example .env
-          </p>
-          <p className="text-muted-foreground">
-            <span className="text-primary">$</span> npm run db:migrate &amp;&amp; npm run db:seed
-          </p>
-          <p>
-            <span className="text-primary">$</span> npm run dev
-          </p>
-        </div>
+        ))}
       </div>
     </section>
   );

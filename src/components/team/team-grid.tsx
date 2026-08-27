@@ -68,16 +68,20 @@ export function TeamGrid({ members }: { members: TeamMember[] }) {
                     {active.role.name}
                   </Badge>
                 </div>
-                <div className="space-y-1.5 rounded-lg border border-border p-3 text-sm">
-                  <a href={`mailto:${active.email}`} className="flex items-center gap-2 text-muted-foreground hover:text-primary">
-                    <Mail className="h-3.5 w-3.5" /> {active.email}
-                  </a>
-                  {active.phone ? (
-                    <a href={`tel:${active.phone}`} className="flex items-center gap-2 text-muted-foreground hover:text-primary">
-                      <Phone className="h-3.5 w-3.5" /> {active.phone}
-                    </a>
-                  ) : null}
-                </div>
+                {active.email || active.phone ? (
+                  <div className="space-y-1.5 rounded-lg border border-border p-3 text-sm">
+                    {active.email ? (
+                      <a href={`mailto:${active.email}`} className="flex items-center gap-2 text-muted-foreground hover:text-primary">
+                        <Mail className="h-3.5 w-3.5" /> {active.email}
+                      </a>
+                    ) : null}
+                    {active.phone ? (
+                      <a href={`tel:${active.phone}`} className="flex items-center gap-2 text-muted-foreground hover:text-primary">
+                        <Phone className="h-3.5 w-3.5" /> {active.phone}
+                      </a>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             </>
           ) : null}

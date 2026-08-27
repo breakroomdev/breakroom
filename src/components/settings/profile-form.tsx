@@ -8,6 +8,7 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { AvatarUpload } from "@/components/settings/avatar-upload";
 
 interface ProfileFormProps {
@@ -19,6 +20,7 @@ interface ProfileFormProps {
     department: string | null;
     pronouns: string | null;
     phone: string | null;
+    hideEmail: boolean;
   };
 }
 
@@ -82,6 +84,14 @@ export function ProfileForm({ initial }: ProfileFormProps) {
               <Input id="phone" value={form.phone ?? ""} onChange={(e) => update("phone", e.target.value)} />
             </Field>
           </div>
+
+          <label className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div>
+              <p className="text-sm font-medium">Hide my email from teammates</p>
+              <p className="text-xs text-muted-foreground">Your email stays visible to workspace admins.</p>
+            </div>
+            <Switch checked={form.hideEmail} onCheckedChange={(v) => setForm((f) => ({ ...f, hideEmail: v }))} />
+          </label>
 
           <div className="flex justify-end">
             <Button type="submit" loading={saving}>

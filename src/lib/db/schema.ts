@@ -33,6 +33,7 @@ export const users = sqliteTable("users", {
   phone: text("phone"),
   colorMode: text("color_mode", { enum: ["light", "dark", "system"] }).notNull().default("system"),
   themeOverride: text("theme_override"),
+  hideEmail: integer("hide_email", { mode: "boolean" }).notNull().default(false),
   isSiteAdmin: integer("is_site_admin", { mode: "boolean" }).notNull().default(false),
   disabledAt: integer("disabled_at", { mode: "timestamp_ms" }),
   ...timestamps,

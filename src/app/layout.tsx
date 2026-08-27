@@ -15,11 +15,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL ?? "http://localhost:3000"),
   title: { default: "Breakroom — Your workplace, in one place.", template: "%s · Breakroom" },
   description:
-    "Breakroom brings workplace communication, schedules, polls and team updates together in one simple, open-source platform.",
+    "Breakroom brings workplace communication, schedules, polls and team updates together in one simple, focused platform.",
   icons: { icon: "/favicon.svg" },
   openGraph: {
     title: "Breakroom — Your workplace, in one place.",
-    description: "The open-source, self-hostable home for workplace communication.",
+    description: "The home for workplace communication, schedules, polls and team updates.",
     siteName: "Breakroom",
     type: "website",
   },

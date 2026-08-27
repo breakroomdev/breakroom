@@ -31,6 +31,7 @@ export default async function SettingsPage({ params }: { params: { workspaceSlug
           department: user.department,
           pronouns: user.pronouns,
           phone: user.phone,
+          hideEmail: user.hideEmail,
         }}
       />
 

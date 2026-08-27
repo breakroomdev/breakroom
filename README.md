@@ -54,8 +54,11 @@ heavyweight than enterprise HR software.
   Cloudflare, Vercel, or any Node host.
 - **Staff panel** — instance-wide admin at `/staff` for whoever runs the deployment (gated by
   a per-user `isSiteAdmin` flag, not tied to any one workspace): browse every workspace, mark
-  one "verified" (a checkmark shown next to its name), permanently delete a workspace, and
-  broadcast an announcement notification to every member of every workspace.
+  one "verified" (a checkmark shown next to its name), change any workspace's URL directly,
+  permanently delete a workspace, and broadcast an announcement notification to every member
+  of every workspace.
+- **Privacy controls** — members can hide their email from the team directory (still visible
+  to workspace admins).
 
 ## Tech stack
 

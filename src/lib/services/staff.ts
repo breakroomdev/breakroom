@@ -1,6 +1,7 @@
 import "server-only";
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, ne, sql } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
+import { RESERVED_SLUGS } from "@/lib/constants";
 
 export async function listWorkspacesForStaff() {
   const db = await getDb();
@@ -29,6 +30,23 @@ export async function setWorkspaceVerified(workspaceId: string, verified: boolea
     .update(schema.workspaces)
     .set({ verifiedAt: verified ? new Date() : null })
     .where(eq(schema.workspaces.id, workspaceId));
+}
+
+/** Changes a workspace's slug (its subdomain/URL). Throws with a user-facing message if invalid or taken. */
+export async function changeWorkspaceSlug(workspaceId: string, slug: string): Promise<void> {
+  const db = await getDb();
+
+  if (RESERVED_SLUGS.has(slug)) {
+    throw new Error("That workspace URL is reserved. Please choose another.");
+  }
+  const taken = await db.query.workspaces.findFirst({
+    where: and(eq(schema.workspaces.slug, slug), ne(schema.workspaces.id, workspaceId)),
+  });
+  if (taken) {
+    throw new Error("That workspace URL is already taken.");
+  }
+
+  await db.update(schema.workspaces).set({ slug, updatedAt: new Date() }).where(eq(schema.workspaces.id, workspaceId));
 }
 
 /** Permanently deletes a workspace and everything in it (relies on ON DELETE CASCADE). */
