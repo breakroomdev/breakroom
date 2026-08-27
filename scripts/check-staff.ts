@@ -4,27 +4,30 @@ import { drizzle } from "drizzle-orm/libsql";
 import { eq } from "drizzle-orm";
 import * as schema from "../src/lib/db/schema";
 
-/** Read-only diagnostic: prints who owns "hq" and every user's isSiteAdmin status. */
+const OWNER_ID = "5235b8fb-43c4-4970-8c8c-64b4fcec0bff"; // jye, owner of "hq"
+
 async function main() {
   const url = process.env.DATABASE_URL ?? "file:./sqlite.db";
   const client = createClient({ url, authToken: process.env.DATABASE_AUTH_TOKEN });
   const db = drizzle(client, { schema });
 
-  const workspace = await db.query.workspaces.findFirst({ where: eq(schema.workspaces.slug, "hq") });
-  console.log("hq workspace:", workspace ? { id: workspace.id, ownerId: workspace.ownerId, slug: workspace.slug } : null);
+  const before = await db.query.users.findFirst({ where: eq(schema.users.id, OWNER_ID) });
+  console.log("before:", before ? { username: before.username, isSiteAdmin: before.isSiteAdmin } : null);
 
-  const admins = await db.query.users.findMany({ where: eq(schema.users.isSiteAdmin, true) });
-  console.log(
-    "users with isSiteAdmin=true:",
-    admins.map((u) => ({ id: u.id, username: u.username, email: u.email }))
-  );
+  const result = await db.update(schema.users).set({ isSiteAdmin: true }).where(eq(schema.users.id, OWNER_ID)).returning();
+  console.log("update() returned:", result);
 
-  if (workspace) {
-    const owner = await db.query.users.findFirst({ where: eq(schema.users.id, workspace.ownerId) });
-    console.log("hq owner:", owner ? { id: owner.id, username: owner.username, email: owner.email, isSiteAdmin: owner.isSiteAdmin } : null);
-  }
+  const after = await db.query.users.findFirst({ where: eq(schema.users.id, OWNER_ID) });
+  console.log("after (same connection):", after ? { username: after.username, isSiteAdmin: after.isSiteAdmin } : null);
 
   client.close();
+
+  // Re-open a fresh connection to rule out any client-side caching.
+  const client2 = createClient({ url, authToken: process.env.DATABASE_AUTH_TOKEN });
+  const db2 = drizzle(client2, { schema });
+  const recheck = await db2.query.users.findFirst({ where: eq(schema.users.id, OWNER_ID) });
+  console.log("recheck (fresh connection):", recheck ? { username: recheck.username, isSiteAdmin: recheck.isSiteAdmin } : null);
+  client2.close();
 }
 
 main().catch((err) => {
