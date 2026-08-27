@@ -11,7 +11,7 @@ import { Logo } from "@/components/brand/logo";
 
 const BOTTOM_ITEMS: NavItem[] = [PRIMARY_NAV[0]!, PRIMARY_NAV[1]!, PRIMARY_NAV[2]!, PRIMARY_NAV[5]!];
 
-export function MobileBottomNav({ workspaceSlug, isAdmin }: { workspaceSlug: string; isAdmin: boolean }) {
+export function MobileBottomNav({ basePath, isAdmin }: { basePath: string; isAdmin: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
 
@@ -19,7 +19,7 @@ export function MobileBottomNav({ workspaceSlug, isAdmin }: { workspaceSlug: str
     <>
       <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-border bg-card/95 backdrop-blur pb-[env(safe-area-inset-bottom)] lg:hidden">
         {BOTTOM_ITEMS.map((item) => {
-          const href = `/${workspaceSlug}${item.href}`;
+          const href = `${basePath}${item.href}` || "/";
           const isActive = item.href === "" ? pathname === href : pathname.startsWith(href);
           const Icon = item.icon;
           return (
@@ -52,7 +52,7 @@ export function MobileBottomNav({ workspaceSlug, isAdmin }: { workspaceSlug: str
             </div>
             <div className="flex flex-1 flex-col gap-1 overflow-y-auto">
               {[...PRIMARY_NAV, ...SECONDARY_NAV, ...(isAdmin ? ADMIN_NAV : [])].map((item) => {
-                const href = `/${workspaceSlug}${item.href}`;
+                const href = `${basePath}${item.href}` || "/";
                 const isActive = item.href === "" ? pathname === href : pathname.startsWith(href);
                 const Icon = item.icon;
                 return (

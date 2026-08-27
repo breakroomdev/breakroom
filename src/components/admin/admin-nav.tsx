@@ -16,9 +16,9 @@ const TABS: { label: string; href: string; permission: Permission }[] = [
   { label: "Moderation", href: "/moderation", permission: "posts.moderate" },
 ];
 
-export function AdminNav({ workspaceSlug, permissions }: { workspaceSlug: string; permissions: string[] }) {
+export function AdminNav({ basePath, permissions }: { basePath: string; permissions: string[] }) {
   const pathname = usePathname();
-  const base = `/${workspaceSlug}/admin`;
+  const base = `${basePath}/admin`;
   const visible = TABS.filter((t) => permissions.includes(t.permission));
 
   return (

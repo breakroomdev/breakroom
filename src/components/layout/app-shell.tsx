@@ -26,7 +26,7 @@ export function AppShell({ ctx, otherWorkspaces, children }: AppShellProps) {
           <WorkspaceSwitcher current={{ slug: ctx.workspace.slug, name: ctx.workspace.name, logoUrl: ctx.workspace.logoUrl }} others={otherWorkspaces} />
         </div>
         <nav className="flex-1 overflow-y-auto py-2">
-          <SidebarNav workspaceSlug={ctx.workspace.slug} isAdmin={isAdmin} />
+          <SidebarNav basePath={ctx.basePath} isAdmin={isAdmin} />
         </nav>
       </aside>
 
@@ -37,8 +37,8 @@ export function AppShell({ ctx, otherWorkspaces, children }: AppShellProps) {
             <span className="font-display text-sm font-semibold">{ctx.workspace.name}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <NotificationBell workspaceId={ctx.workspace.id} workspaceSlug={ctx.workspace.slug} initialUnread={ctx.unreadNotifications} />
-            <UserMenu workspaceSlug={ctx.workspace.slug} name={ctx.user.displayName} username={ctx.user.username} avatarUrl={ctx.user.avatarUrl} isAdmin={isAdmin} />
+            <NotificationBell workspaceId={ctx.workspace.id} workspaceSlug={ctx.workspace.slug} basePath={ctx.basePath} initialUnread={ctx.unreadNotifications} />
+            <UserMenu basePath={ctx.basePath} name={ctx.user.displayName} username={ctx.user.username} avatarUrl={ctx.user.avatarUrl} isAdmin={isAdmin} />
           </div>
         </header>
 
@@ -47,7 +47,7 @@ export function AppShell({ ctx, otherWorkspaces, children }: AppShellProps) {
         </main>
       </div>
 
-      <MobileBottomNav workspaceSlug={ctx.workspace.slug} isAdmin={isAdmin} />
+      <MobileBottomNav basePath={ctx.basePath} isAdmin={isAdmin} />
     </div>
   );
 }

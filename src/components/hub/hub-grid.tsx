@@ -16,7 +16,7 @@ interface HubLinkItem {
   openMode: "embed" | "new_tab";
 }
 
-export function HubGrid({ links, canManage, workspaceSlug }: { links: HubLinkItem[]; canManage: boolean; workspaceSlug: string }) {
+export function HubGrid({ links, canManage, basePath }: { links: HubLinkItem[]; canManage: boolean; basePath: string }) {
   const [embedded, setEmbedded] = React.useState<HubLinkItem | null>(null);
 
   if (links.length === 0) {
@@ -28,7 +28,7 @@ export function HubGrid({ links, canManage, workspaceSlug }: { links: HubLinkIte
         action={
           canManage ? (
             <Button asChild>
-              <Link href={`/${workspaceSlug}/admin/hub`}>
+              <Link href={`${basePath}/admin/hub`}>
                 <Settings className="h-4 w-4" /> Manage Hub
               </Link>
             </Button>
@@ -43,7 +43,7 @@ export function HubGrid({ links, canManage, workspaceSlug }: { links: HubLinkIte
       {canManage ? (
         <div className="mb-4 flex justify-end">
           <Button variant="secondary" size="sm" asChild>
-            <Link href={`/${workspaceSlug}/admin/hub`}>
+            <Link href={`${basePath}/admin/hub`}>
               <Settings className="h-4 w-4" /> Manage Hub
             </Link>
           </Button>

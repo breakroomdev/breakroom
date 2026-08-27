@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatDate, formatTime } from "@/lib/utils";
+import { getWorkspaceBasePath } from "@/lib/workspace-base-path";
 
 export const metadata = { title: "Home" };
 
@@ -17,6 +18,8 @@ export default async function DashboardPage({ params }: { params: { workspaceSlu
 
   const membership = await getMembership(user.id, params.workspaceSlug);
   if (!membership) redirect("/workspaces");
+
+  const basePath = getWorkspaceBasePath(params.workspaceSlug);
 
   const [shifts, pinnedPosts, stats] = await Promise.all([
     getUpcomingShifts(membership.workspace.id, user.id),
@@ -47,7 +50,7 @@ export default async function DashboardPage({ params }: { params: { workspaceSlu
         <Card className="lg:col-span-3">
           <CardHeader className="flex-row items-center justify-between space-y-0">
             <CardTitle>Pinned posts</CardTitle>
-            <Link href={`/${params.workspaceSlug}/feed`} className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+            <Link href={`${basePath}/feed`} className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
               Go to feed <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </CardHeader>
@@ -57,7 +60,7 @@ export default async function DashboardPage({ params }: { params: { workspaceSlu
             ) : (
               <div className="space-y-3">
                 {pinnedPosts.map(({ post, author }) => (
-                  <Link key={post.id} href={`/${params.workspaceSlug}/feed`} className="block rounded-lg border border-border p-3 transition-colors hover:bg-muted/50">
+                  <Link key={post.id} href={`${basePath}/feed`} className="block rounded-lg border border-border p-3 transition-colors hover:bg-muted/50">
                     <p className="text-sm font-medium">{author.displayName}</p>
                     <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{post.content}</p>
                   </Link>
@@ -70,7 +73,7 @@ export default async function DashboardPage({ params }: { params: { workspaceSlu
         <Card className="lg:col-span-2">
           <CardHeader className="flex-row items-center justify-between space-y-0">
             <CardTitle>Your upcoming shifts</CardTitle>
-            <Link href={`/${params.workspaceSlug}/schedule`} className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+            <Link href={`${basePath}/schedule`} className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
               Schedule <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </CardHeader>
@@ -101,9 +104,9 @@ export default async function DashboardPage({ params }: { params: { workspaceSlu
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <QuickLink href={`/${params.workspaceSlug}/polls`} icon={BarChart3} label="Create a poll" description="Get quick input from the team" />
-        <QuickLink href={`/${params.workspaceSlug}/team`} icon={Users} label="Team directory" description="See who's who" />
-        <QuickLink href={`/${params.workspaceSlug}/schedule`} icon={CalendarDays} label="View schedule" description="Check coverage this week" />
+        <QuickLink href={`${basePath}/polls`} icon={BarChart3} label="Create a poll" description="Get quick input from the team" />
+        <QuickLink href={`${basePath}/team`} icon={Users} label="Team directory" description="See who's who" />
+        <QuickLink href={`${basePath}/schedule`} icon={CalendarDays} label="View schedule" description="Check coverage this week" />
       </div>
     </div>
   );

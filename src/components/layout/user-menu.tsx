@@ -7,14 +7,14 @@ import { Avatar } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface UserMenuProps {
-  workspaceSlug: string;
+  basePath: string;
   name: string;
   username: string;
   avatarUrl: string | null;
   isAdmin: boolean;
 }
 
-export function UserMenu({ workspaceSlug, name, username, avatarUrl, isAdmin }: UserMenuProps) {
+export function UserMenu({ basePath, name, username, avatarUrl, isAdmin }: UserMenuProps) {
   const router = useRouter();
 
   async function logout() {
@@ -35,20 +35,20 @@ export function UserMenu({ workspaceSlug, name, username, avatarUrl, isAdmin }: 
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={`/${workspaceSlug}/settings`}>
+          <Link href={`${basePath}/settings`}>
             <User className="h-4 w-4" />
             Your profile
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href={`/${workspaceSlug}/settings`}>
+          <Link href={`${basePath}/settings`}>
             <Settings className="h-4 w-4" />
             Settings
           </Link>
         </DropdownMenuItem>
         {isAdmin ? (
           <DropdownMenuItem asChild>
-            <Link href={`/${workspaceSlug}/admin`}>
+            <Link href={`${basePath}/admin`}>
               <ShieldCheck className="h-4 w-4" />
               Admin dashboard
             </Link>

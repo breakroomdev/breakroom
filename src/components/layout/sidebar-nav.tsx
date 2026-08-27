@@ -5,14 +5,14 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { PRIMARY_NAV, SECONDARY_NAV, ADMIN_NAV, type NavItem } from "@/lib/nav";
 
-function NavGroup({ workspaceSlug, items, label }: { workspaceSlug: string; items: NavItem[]; label?: string }) {
+function NavGroup({ basePath, items, label }: { basePath: string; items: NavItem[]; label?: string }) {
   const pathname = usePathname();
 
   return (
     <div className="space-y-1">
       {label ? <p className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground/80">{label}</p> : null}
       {items.map((item) => {
-        const href = `/${workspaceSlug}${item.href}`;
+        const href = `${basePath}${item.href}` || "/";
         const isActive = item.href === "" ? pathname === href : pathname.startsWith(href);
         const Icon = item.icon;
         return (
@@ -35,16 +35,16 @@ function NavGroup({ workspaceSlug, items, label }: { workspaceSlug: string; item
   );
 }
 
-export function SidebarNav({ workspaceSlug, isAdmin }: { workspaceSlug: string; isAdmin: boolean }) {
+export function SidebarNav({ basePath, isAdmin }: { basePath: string; isAdmin: boolean }) {
   return (
     <div className="space-y-4">
-      <NavGroup workspaceSlug={workspaceSlug} items={PRIMARY_NAV} />
+      <NavGroup basePath={basePath} items={PRIMARY_NAV} />
       <div className="h-px bg-border" />
-      <NavGroup workspaceSlug={workspaceSlug} items={SECONDARY_NAV} />
+      <NavGroup basePath={basePath} items={SECONDARY_NAV} />
       {isAdmin ? (
         <>
           <div className="h-px bg-border" />
-          <NavGroup workspaceSlug={workspaceSlug} items={ADMIN_NAV} label="Workspace" />
+          <NavGroup basePath={basePath} items={ADMIN_NAV} label="Workspace" />
         </>
       ) : null}
     </div>

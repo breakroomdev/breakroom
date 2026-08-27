@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { getMembership } from "@/lib/auth/authorize";
 import { WorkspaceProvider } from "@/components/workspace-context";
 import { AppShell } from "@/components/layout/app-shell";
+import { getWorkspaceBasePath } from "@/lib/workspace-base-path";
 import type { Permission } from "@/lib/permissions";
 
 export default async function WorkspaceLayout({
@@ -14,8 +15,10 @@ export default async function WorkspaceLayout({
   children: React.ReactNode;
   params: { workspaceSlug: string };
 }) {
+  const basePath = getWorkspaceBasePath(params.workspaceSlug);
+
   const user = await getCurrentUser();
-  if (!user) redirect(`/login?next=/${params.workspaceSlug}`);
+  if (!user) redirect(`/login?next=${basePath || "/"}`);
 
   const membership = await getMembership(user.id, params.workspaceSlug);
   if (!membership) redirect("/workspaces");
@@ -37,6 +40,7 @@ export default async function WorkspaceLayout({
   const otherWorkspaces = otherMemberships.map((m) => m.workspace).filter((w) => w.slug !== params.workspaceSlug);
 
   const ctxValue = {
+    basePath,
     workspace: {
       id: membership.workspace.id,
       name: membership.workspace.name,

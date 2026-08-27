@@ -19,7 +19,24 @@ interface NotificationItem {
   actor: { displayName: string; avatarUrl: string | null } | null;
 }
 
-export function NotificationBell({ workspaceId, workspaceSlug, initialUnread }: { workspaceId: string; workspaceSlug: string; initialUnread: number }) {
+/** Notification links are stored as "/{slug}/...". Re-root them under the current basePath. */
+function resolveLink(link: string | null, workspaceSlug: string, basePath: string): string {
+  const prefix = `/${workspaceSlug}`;
+  const rest = link && link.startsWith(prefix) ? link.slice(prefix.length) : link || "/notifications";
+  return `${basePath}${rest}`;
+}
+
+export function NotificationBell({
+  workspaceId,
+  workspaceSlug,
+  basePath,
+  initialUnread,
+}: {
+  workspaceId: string;
+  workspaceSlug: string;
+  basePath: string;
+  initialUnread: number;
+}) {
   const [open, setOpen] = React.useState(false);
   const [items, setItems] = React.useState<NotificationItem[]>([]);
   const [unread, setUnread] = React.useState(initialUnread);
@@ -91,7 +108,7 @@ export function NotificationBell({ workspaceId, workspaceSlug, initialUnread }: 
             items.map((item) => (
               <Link
                 key={item.id}
-                href={item.link ?? `/${workspaceSlug}/notifications`}
+                href={resolveLink(item.link, workspaceSlug, basePath)}
                 onClick={() => !item.isRead && markRead(item.id)}
                 className={cn("flex gap-3 border-b border-border px-4 py-3 text-sm transition-colors last:border-0 hover:bg-muted", !item.isRead && "bg-primary-50/60 dark:bg-primary-500/10")}
               >
@@ -111,7 +128,7 @@ export function NotificationBell({ workspaceId, workspaceSlug, initialUnread }: 
           )}
         </div>
         <div className="border-t border-border p-2">
-          <Link href={`/${workspaceSlug}/notifications`} className="block rounded-lg px-2 py-2 text-center text-sm font-medium text-primary hover:bg-muted" onClick={() => setOpen(false)}>
+          <Link href={`${basePath}/notifications`} className="block rounded-lg px-2 py-2 text-center text-sm font-medium text-primary hover:bg-muted" onClick={() => setOpen(false)}>
             View all notifications
           </Link>
         </div>
