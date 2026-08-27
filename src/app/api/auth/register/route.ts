@@ -3,7 +3,7 @@ import { getDb, schema } from "@/lib/db";
 import { registerSchema } from "@/lib/validation/auth";
 import { hashPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
-import { createWorkspace, generateUniqueSlug } from "@/lib/workspace-service";
+import { createWorkspace, generateUniqueSlug, addMemberToWorkspace } from "@/lib/workspace-service";
 import { jsonError, jsonOk, withErrorHandling } from "@/lib/api/response";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { isSameOriginRequest } from "@/lib/api/csrf";
@@ -34,6 +34,16 @@ export const POST = withErrorHandling(async (req: Request) => {
     }
   }
 
+  let joinWorkspace: typeof schema.workspaces.$inferSelect | undefined;
+  if (!invite && body.joinWorkspaceSlug) {
+    joinWorkspace = await db.query.workspaces.findFirst({ where: eq(schema.workspaces.slug, body.joinWorkspaceSlug) });
+    if (!joinWorkspace) return jsonError("That workspace couldn't be found.", 404);
+    const settings = await db.query.workspaceSettings.findFirst({ where: eq(schema.workspaceSettings.workspaceId, joinWorkspace.id) });
+    if (settings && !settings.allowSelfRegistration) {
+      return jsonError("This workspace requires an invite to join.", 403);
+    }
+  }
+
   const passwordHash = await hashPassword(body.password);
 
   const [user] = await db
@@ -58,6 +68,9 @@ export const POST = withErrorHandling(async (req: Request) => {
       await db2.update(schema.invites).set({ acceptedAt: new Date() }).where(eq(schema.invites.id, invite.id));
       workspaceSlug = workspace.slug;
     }
+  } else if (joinWorkspace) {
+    await addMemberToWorkspace(joinWorkspace.id, user.id, "employee");
+    workspaceSlug = joinWorkspace.slug;
   } else if (body.workspaceName) {
     const slug = body.workspaceSlug ? await generateUniqueSlug(body.workspaceSlug) : undefined;
     const workspace = await createWorkspace({ name: body.workspaceName, ownerId: user.id, slug });

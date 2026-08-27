@@ -7,8 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
 
-export function RegisterForm({ invite, inviteWorkspaceName }: { invite?: string; inviteWorkspaceName?: string }) {
+interface RegisterFormProps {
+  invite?: string;
+  inviteWorkspaceName?: string;
+  joinWorkspaceSlug?: string;
+  joinWorkspaceName?: string;
+}
+
+export function RegisterForm({ invite, inviteWorkspaceName, joinWorkspaceSlug, joinWorkspaceName }: RegisterFormProps) {
   const router = useRouter();
+  const skipWorkspaceName = Boolean(invite || joinWorkspaceSlug);
   const [form, setForm] = React.useState({
     displayName: "",
     email: "",
@@ -38,7 +46,8 @@ export function RegisterForm({ invite, inviteWorkspaceName }: { invite?: string;
           email: form.email,
           username: form.username,
           password: form.password,
-          workspaceName: invite ? undefined : form.workspaceName || undefined,
+          workspaceName: skipWorkspaceName ? undefined : form.workspaceName || undefined,
+          joinWorkspaceSlug,
           invite,
         }),
       });
@@ -66,6 +75,11 @@ export function RegisterForm({ invite, inviteWorkspaceName }: { invite?: string;
           You're joining <strong>{inviteWorkspaceName}</strong>
         </p>
       ) : null}
+      {!invite && joinWorkspaceSlug && joinWorkspaceName ? (
+        <p className="rounded-lg bg-primary-50 px-3 py-2 text-sm text-primary-800">
+          You're joining <strong>{joinWorkspaceName}</strong>
+        </p>
+      ) : null}
 
       <Field label="Full name" htmlFor="displayName">
         <Input id="displayName" autoComplete="name" required value={form.displayName} onChange={(e) => update("displayName", e.target.value)} />
@@ -80,7 +94,7 @@ export function RegisterForm({ invite, inviteWorkspaceName }: { invite?: string;
         <Input id="password" type="password" autoComplete="new-password" required minLength={8} value={form.password} onChange={(e) => update("password", e.target.value)} />
       </Field>
 
-      {!invite ? (
+      {!skipWorkspaceName ? (
         <Field label="Workspace name" htmlFor="workspaceName" hint="Give your team's workspace a name — you can invite teammates after.">
           <Input id="workspaceName" placeholder="Acme Inc." required value={form.workspaceName} onChange={(e) => update("workspaceName", e.target.value)} />
         </Field>

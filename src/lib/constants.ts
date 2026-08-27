@@ -15,4 +15,5 @@ export const RESERVED_SLUGS = new Set([
   "favicon.ico",
   "public",
   "assets",
+  "search",
 ]);

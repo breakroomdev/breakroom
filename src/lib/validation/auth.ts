@@ -13,6 +13,7 @@ export const registerSchema = z.object({
   displayName: z.string().min(1, "Enter your name").max(80),
   workspaceName: z.string().min(2).max(80).optional(),
   workspaceSlug: z.string().min(2).max(48).optional(),
+  joinWorkspaceSlug: z.string().min(2).max(48).optional(),
   invite: z.string().optional(),
 });
 
