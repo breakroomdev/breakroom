@@ -19,9 +19,6 @@ export const updateWorkspaceSchema = z.object({
 export const updateWorkspaceAuthSchema = z.object({
   authPasswordEnabled: z.boolean().optional(),
   authDiscordEnabled: z.boolean().optional(),
-  discordClientId: z.string().max(200).optional().nullable(),
-  discordClientSecret: z.string().max(200).optional().nullable(),
-  discordRedirectUri: z.string().url().optional().nullable(),
   allowSelfRegistration: z.boolean().optional(),
 });
 

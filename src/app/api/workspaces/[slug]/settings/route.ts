@@ -18,9 +18,6 @@ export const GET = withErrorHandling(async (_req: Request, { params }: { params:
       ? {
           authPasswordEnabled: settings.authPasswordEnabled,
           authDiscordEnabled: settings.authDiscordEnabled,
-          discordClientId: settings.discordClientId,
-          hasDiscordSecret: !!settings.discordClientSecret,
-          discordRedirectUri: settings.discordRedirectUri,
           allowSelfRegistration: settings.allowSelfRegistration,
         }
       : null,
@@ -36,13 +33,9 @@ export const PATCH = withErrorHandling(async (req: Request, { params }: { params
   const body = updateWorkspaceAuthSchema.parse(await req.json());
   const db = await getDb();
 
-  const updates: Record<string, unknown> = { ...body, updatedAt: new Date() };
-  // Don't overwrite the stored secret with an empty string if the admin left the field blank.
-  if (body.discordClientSecret === "") delete updates.discordClientSecret;
-
   await db
     .update(schema.workspaceSettings)
-    .set(updates)
+    .set({ ...body, updatedAt: new Date() })
     .where(eq(schema.workspaceSettings.workspaceId, membership.workspace.id));
 
   return jsonOk({ success: true });

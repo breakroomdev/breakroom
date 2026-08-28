@@ -9,12 +9,14 @@ import { WorkspacePicker } from "@/components/auth/workspace-picker";
 import { Avatar } from "@/components/ui/avatar";
 import { workspaceUrl, workspaceDisplayHost } from "@/lib/workspace-url";
 import { getRequestWorkspaceSlug } from "@/lib/workspace-base-path";
+import { getInstanceDiscordCredentials } from "@/lib/auth/discord-config";
 
 export const metadata = { title: "Sign in" };
 
 async function getWorkspaceAuthContext(workspaceSlug?: string) {
   let passwordEnabled = true;
-  let discordEnabled = Boolean(process.env.DISCORD_CLIENT_ID && process.env.DISCORD_CLIENT_SECRET);
+  const instanceDiscordConfigured = Boolean(await getInstanceDiscordCredentials());
+  let discordEnabled = instanceDiscordConfigured;
   let workspace: { name: string; slug: string; logoUrl: string | null } | null = null;
   let allowSelfRegistration = true;
 
@@ -23,9 +25,9 @@ async function getWorkspaceAuthContext(workspaceSlug?: string) {
     const found = await db.query.workspaces.findFirst({ where: eq(schema.workspaces.slug, workspaceSlug), with: { settings: true } });
     if (found) {
       workspace = { name: found.name, slug: found.slug, logoUrl: found.logoUrl };
+      discordEnabled = instanceDiscordConfigured && !!found.settings?.authDiscordEnabled;
       if (found.settings) {
         passwordEnabled = found.settings.authPasswordEnabled;
-        discordEnabled = discordEnabled || Boolean(found.settings.authDiscordEnabled && found.settings.discordClientId);
         allowSelfRegistration = found.settings.allowSelfRegistration;
       }
     }

@@ -23,9 +23,6 @@ export default async function AdminAuthPage({ params }: { params: { workspaceSlu
       initial={{
         authPasswordEnabled: settings?.authPasswordEnabled ?? true,
         authDiscordEnabled: settings?.authDiscordEnabled ?? false,
-        discordClientId: settings?.discordClientId ?? "",
-        hasDiscordSecret: !!settings?.discordClientSecret,
-        discordRedirectUri: settings?.discordRedirectUri ?? `${process.env.APP_URL}/api/auth/discord/callback`,
         allowSelfRegistration: settings?.allowSelfRegistration ?? true,
       }}
     />

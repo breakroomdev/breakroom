@@ -9,6 +9,7 @@ import { WorkspacePicker } from "@/components/auth/workspace-picker";
 import { Avatar } from "@/components/ui/avatar";
 import { workspaceDisplayHost } from "@/lib/workspace-url";
 import { getRequestWorkspaceSlug } from "@/lib/workspace-base-path";
+import { getInstanceDiscordCredentials } from "@/lib/auth/discord-config";
 
 export const metadata = { title: "Create your account" };
 
@@ -23,7 +24,7 @@ async function getJoinWorkspace(slug?: string) {
     slug: workspace.slug,
     logoUrl: workspace.logoUrl,
     allowSelfRegistration: settings?.allowSelfRegistration ?? true,
-    discordEnabled: Boolean(settings?.authDiscordEnabled && settings.discordClientId),
+    authDiscordEnabled: Boolean(settings?.authDiscordEnabled),
   };
 }
 
@@ -31,8 +32,8 @@ export default async function RegisterPage({ searchParams }: { searchParams: { w
   const fromHost = !searchParams.workspace && !!getRequestWorkspaceSlug();
   const workspaceSlug = searchParams.workspace ?? getRequestWorkspaceSlug() ?? undefined;
   const joinWorkspace = await getJoinWorkspace(workspaceSlug);
-  const globalDiscordEnabled = Boolean(process.env.DISCORD_CLIENT_ID && process.env.DISCORD_CLIENT_SECRET);
-  const discordEnabled = joinWorkspace ? joinWorkspace.discordEnabled || globalDiscordEnabled : globalDiscordEnabled;
+  const instanceDiscordConfigured = Boolean(await getInstanceDiscordCredentials());
+  const discordEnabled = instanceDiscordConfigured && (joinWorkspace ? joinWorkspace.authDiscordEnabled : true);
 
   return (
     <AuthShell
