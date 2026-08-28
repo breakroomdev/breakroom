@@ -197,11 +197,20 @@ function TestStep({
   integrationId: string;
   onConnected: (row: IntegrationRow) => void;
 }) {
+  const [lostIntegration, setLostIntegration] = React.useState(false);
+
   React.useEffect(() => {
     let cancelled = false;
     const interval = setInterval(async () => {
       const res = await fetch(`/api/workspaces/${workspaceSlug}/integrations/${integrationId}`);
-      if (!res.ok || cancelled) return;
+      if (cancelled) return;
+      if (res.status === 404) {
+        // The integration was disconnected (e.g. from another tab) while this wizard was waiting.
+        clearInterval(interval);
+        setLostIntegration(true);
+        return;
+      }
+      if (!res.ok) return;
       const data = await res.json();
       if (data.integration.messageCount > 0) {
         clearInterval(interval);
@@ -216,6 +225,18 @@ function TestStep({
       clearInterval(interval);
     };
   }, [workspaceSlug, integrationId, onConnected]);
+
+  if (lostIntegration) {
+    return (
+      <>
+        <DialogHeader>
+          <DialogTitle>This integration no longer exists</DialogTitle>
+          <DialogDescription>It looks like it was disconnected while this wizard was waiting — possibly from another tab.</DialogDescription>
+        </DialogHeader>
+        <p className="py-4 text-sm text-muted-foreground">Close this and connect again from Admin → Integrations.</p>
+      </>
+    );
+  }
 
   return (
     <>
