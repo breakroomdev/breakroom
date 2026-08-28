@@ -9,7 +9,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { CopyButton } from "@/components/ui/copy-button";
+import { RobloxScriptBlock } from "@/components/admin/integrations/roblox-script-block";
 import { useWorkspace } from "@/components/workspace-context";
 import { relativeTime } from "@/lib/utils";
 import type { IntegrationTypeDef } from "@/lib/integrations/registry";
@@ -155,12 +155,14 @@ export function RobloxManagePanel({
                 </Button>
               </div>
               {newSecret ? (
-                <div className="space-y-1.5">
-                  <p className="text-xs text-warning-strong">New secret — shown once. Update your Roblox script now.</p>
-                  <div className="flex items-center gap-2">
-                    <code className="flex-1 truncate rounded-md bg-muted px-2 py-1 text-xs">{newSecret}</code>
-                    <CopyButton value={newSecret} />
-                  </div>
+                <div className="space-y-2">
+                  <p className="text-xs text-warning-strong">New secret — shown once. Paste this updated script into Roblox now; the old secret already stopped working.</p>
+                  <RobloxScriptBlock
+                    apiUrl={`${process.env.NEXT_PUBLIC_APP_URL ?? ""}/api/integrations/roblox/chat`}
+                    secret={newSecret}
+                    universeId={integration.config.universeId ?? ""}
+                    placeId={integration.config.placeId ?? ""}
+                  />
                 </div>
               ) : (
                 <p className="text-xs text-muted-foreground">•••• {integration.secretLastFour ?? "····"} — never shown again after creation.</p>

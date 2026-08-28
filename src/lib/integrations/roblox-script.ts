@@ -64,14 +64,25 @@ local function sendChatMessage(payload)
 		end)
 
 		if ok and response and response.Success then
+			print("[Breakroom] Message forwarded successfully (status " .. tostring(response.StatusCode) .. ").")
 			return true
 		end
 
-		-- Don't hammer Breakroom (or Roblox's HTTP rate limits) on failure.
+		local reason
+		if not ok then
+			reason = "HttpService threw: " .. tostring(response)
+		elseif response then
+			reason = "HTTP " .. tostring(response.StatusCode) .. " " .. tostring(response.StatusMessage) .. " — " .. tostring(response.Body)
+		else
+			reason = "unknown error"
+		end
+
 		if attempt < MAX_RETRIES then
+			warn("[Breakroom] Attempt " .. attempt .. "/" .. MAX_RETRIES .. " failed (" .. reason .. "), retrying…")
+			-- Don't hammer Breakroom (or Roblox's HTTP rate limits) on failure.
 			task.wait(RETRY_DELAY_SECONDS * attempt)
 		else
-			warn("[Breakroom] Failed to forward chat message after " .. MAX_RETRIES .. " attempts: " .. tostring(response and response.StatusMessage or "unknown error"))
+			warn("[Breakroom] Giving up after " .. MAX_RETRIES .. " attempts: " .. reason)
 		end
 	end
 
@@ -79,14 +90,18 @@ local function sendChatMessage(payload)
 end
 
 local function onIncomingMessage(textChatMessage)
+	print("[Breakroom] TextChatService.MessageReceived fired.")
+
 	-- Only forward real player chat, not system/status messages.
 	local speaker = textChatMessage.TextSource
 	if not speaker then
+		print("[Breakroom] Skipped — no TextSource (likely a system message).")
 		return
 	end
 
 	local player = Players:GetPlayerByUserId(speaker.UserId)
 	if not player then
+		print("[Breakroom] Skipped — TextSource UserId " .. tostring(speaker.UserId) .. " has no matching Player.")
 		return
 	end
 
@@ -94,12 +109,14 @@ local function onIncomingMessage(textChatMessage)
 	-- already run — we never see or forward unfiltered text.
 	local text = textChatMessage.Text
 	if not text or text == "" then
+		print("[Breakroom] Skipped — empty message text (likely filtered to nothing).")
 		return
 	end
 
 	pruneRecentlySent()
 	local dedupeKey = player.UserId .. ":" .. text .. ":" .. tostring(math.floor(os.clock()))
 	if recentlySent[dedupeKey] then
+		print("[Breakroom] Skipped — duplicate of a message just sent.")
 		return
 	end
 	recentlySent[dedupeKey] = os.clock()
@@ -115,12 +132,14 @@ local function onIncomingMessage(textChatMessage)
 		timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
 	}
 
+	print("[Breakroom] Sending message from " .. player.Name .. " to " .. BREAKROOM_API_URL .. "…")
+
 	-- Fire-and-forget on a separate thread so a slow/failed request never
 	-- stalls the chat system or the rest of the game.
 	task.spawn(function()
-		local ok = pcall(sendChatMessage, payload)
+		local ok, err = pcall(sendChatMessage, payload)
 		if not ok then
-			warn("[Breakroom] Unexpected error forwarding chat message")
+			warn("[Breakroom] Unexpected Lua error while forwarding: " .. tostring(err))
 		end
 	end)
 end
@@ -128,5 +147,6 @@ end
 TextChatService.MessageReceived:Connect(onIncomingMessage)
 
 print("[Breakroom] Roblox Chat Logger connected — forwarding chat to Breakroom.")
+print("[Breakroom] Endpoint: " .. BREAKROOM_API_URL .. " | Universe " .. UNIVERSE_ID .. " | Place " .. PLACE_ID)
 `;
 }
