@@ -66,7 +66,6 @@ local function sendChatMessage(payload)
 		end)
 
 		if ok and response and response.Success then
-			print("[Breakroom] Message forwarded successfully (status " .. tostring(response.StatusCode) .. ").")
 			return true
 		end
 
@@ -103,13 +102,11 @@ local function forwardMessage(textChatMessage)
 	-- Only forward real player chat, not system/status messages.
 	local speaker = textChatMessage.TextSource
 	if not speaker then
-		print("[Breakroom] Skipped — no TextSource (likely a system message).")
 		return
 	end
 
 	local player = Players:GetPlayerByUserId(speaker.UserId)
 	if not player then
-		print("[Breakroom] Skipped — TextSource UserId " .. tostring(speaker.UserId) .. " has no matching Player.")
 		return
 	end
 
@@ -117,7 +114,6 @@ local function forwardMessage(textChatMessage)
 	-- already run — we never see or forward unfiltered text.
 	local text = textChatMessage.Text
 	if not text or text == "" then
-		print("[Breakroom] Skipped — empty message text (likely filtered to nothing).")
 		return
 	end
 
@@ -131,8 +127,6 @@ local function forwardMessage(textChatMessage)
 		message = text,
 		timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
 	}
-
-	print("[Breakroom] Sending message from " .. player.Name .. " to " .. BREAKROOM_API_URL .. "…")
 
 	-- Fire-and-forget on a separate thread so a slow/failed request never
 	-- stalls the chat system or the rest of the game.
@@ -160,7 +154,6 @@ local function watchChannel(channel)
 		forwardMessage(message)
 		return true
 	end
-	print("[Breakroom] Watching chat channel: " .. channel.Name)
 end
 
 local channelsFolder = TextChatService:WaitForChild("TextChannels")

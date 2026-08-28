@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Search, X, ChevronDown, Gamepad2 } from "lucide-react";
+import { Search, SlidersHorizontal, X, ChevronDown, Gamepad2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useWorkspace } from "@/components/workspace-context";
-import { relativeTime, formatDate } from "@/lib/utils";
+import { cn, relativeTime, formatDate } from "@/lib/utils";
 import { RobloxProfileTrigger } from "@/components/integrations/roblox-profile-panel";
 
 interface RobloxMessage {
@@ -45,6 +45,7 @@ export function RobloxChatViewer({
   const [loadingMore, setLoadingMore] = React.useState(false);
   const [filters, setFilters] = React.useState<Filters>(EMPTY_FILTERS);
   const [appliedFilters, setAppliedFilters] = React.useState<Filters>(EMPTY_FILTERS);
+  const [showFilters, setShowFilters] = React.useState(false);
   const hasFilters = Object.values(appliedFilters).some(Boolean);
   const latestTimestampRef = React.useRef<number | null>(initialMessages[0]?.timestamp ?? null);
 
@@ -126,27 +127,44 @@ export function RobloxChatViewer({
 
   return (
     <div>
-      <form onSubmit={applyFilters} className="mb-4 space-y-2">
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={filters.q} onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))} placeholder="Search messages…" className="pl-9" />
-        </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <Input value={filters.username} onChange={(e) => setFilters((f) => ({ ...f, username: e.target.value }))} placeholder="Username" />
-          <Input value={filters.jobId} onChange={(e) => setFilters((f) => ({ ...f, jobId: e.target.value }))} placeholder="Server ID" />
-          <Input type="date" value={filters.from} onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))} />
-          <Input type="date" value={filters.to} onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value }))} />
-        </div>
+      <form onSubmit={applyFilters} className="mb-4">
         <div className="flex gap-2">
-          <Button type="submit" size="sm" variant="secondary" loading={loading}>
-            Apply filters
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input value={filters.q} onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))} placeholder="Search messages…" className="pl-9" />
+          </div>
+          <Button
+            type="button"
+            variant={showFilters || hasFilters ? "secondary" : "outline"}
+            onClick={() => setShowFilters((s) => !s)}
+            className="shrink-0"
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            <span className="hidden sm:inline">Filters</span>
+            {hasFilters ? <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">•</span> : null}
           </Button>
-          {hasFilters ? (
-            <Button type="button" size="sm" variant="ghost" onClick={clearFilters}>
-              <X className="h-3.5 w-3.5" /> Clear filters
-            </Button>
-          ) : null}
         </div>
+
+        {showFilters ? (
+          <div className="mt-2 space-y-3 rounded-xl border border-border bg-muted/30 p-3">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <Input value={filters.username} onChange={(e) => setFilters((f) => ({ ...f, username: e.target.value }))} placeholder="Username" />
+              <Input value={filters.jobId} onChange={(e) => setFilters((f) => ({ ...f, jobId: e.target.value }))} placeholder="Server ID" />
+              <Input type="date" value={filters.from} onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))} />
+              <Input type="date" value={filters.to} onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value }))} />
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" size="sm" loading={loading}>
+                Apply filters
+              </Button>
+              {hasFilters ? (
+                <Button type="button" size="sm" variant="ghost" onClick={clearFilters}>
+                  <X className="h-3.5 w-3.5" /> Clear
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
       </form>
 
       {messages.length === 0 ? (
@@ -156,7 +174,7 @@ export function RobloxChatViewer({
           description={hasFilters ? undefined : "Once your Roblox script is sending chat, messages will appear here live."}
         />
       ) : (
-        <div className="divide-y divide-border rounded-xl border border-border">
+        <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
           {messages.map((m) => (
             <ChatMessageRow key={m.id} message={m} />
           ))}
@@ -175,13 +193,26 @@ export function RobloxChatViewer({
   );
 }
 
+const AVATAR_TONES = [
+  "bg-primary-100 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300",
+  "bg-accent/15 text-accent-foreground",
+  "bg-success/15 text-success",
+  "bg-warning/15 text-warning-strong",
+];
+
+function avatarTone(username: string) {
+  let hash = 0;
+  for (let i = 0; i < username.length; i++) hash = (hash * 31 + username.charCodeAt(i)) >>> 0;
+  return AVATAR_TONES[hash % AVATAR_TONES.length];
+}
+
 function ChatMessageRow({ message }: { message: RobloxMessage }) {
   const [expanded, setExpanded] = React.useState(false);
 
   return (
-    <div className="flex gap-3 p-3">
+    <div className={cn("group flex gap-3 p-3.5 transition-colors hover:bg-muted/40", expanded && "bg-muted/40")}>
       <div className="relative shrink-0">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-brand-soft text-sm font-bold text-primary">
+        <div className={cn("flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold", avatarTone(message.username))}>
           {message.displayName.slice(0, 1).toUpperCase()}
         </div>
         <div className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border-2 border-card bg-[#00A2FF] text-white">
@@ -200,18 +231,23 @@ function ChatMessageRow({ message }: { message: RobloxMessage }) {
               @{message.username}
             </button>
           </RobloxProfileTrigger>
-          <button type="button" onClick={() => setExpanded((s) => !s)} className="ml-auto flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+          <button
+            type="button"
+            onClick={() => setExpanded((s) => !s)}
+            className="ml-auto flex shrink-0 items-center gap-1 text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground data-[expanded=true]:opacity-100"
+            data-expanded={expanded}
+          >
             {formatDate(new Date(message.timestamp), { hour: "numeric", minute: "2-digit", month: "short", day: "numeric" })}
             <ChevronDown className={`h-3 w-3 transition-transform ${expanded ? "rotate-180" : ""}`} />
           </button>
         </div>
-        <p className="mt-0.5 break-words text-sm text-foreground/90">{message.message}</p>
+        <p className="mt-0.5 break-words text-sm leading-relaxed text-foreground/90">{message.message}</p>
         {expanded ? (
-          <p className="mt-1.5 space-x-3 text-xs text-muted-foreground">
-            <span>Server: {message.jobId}</span>
-            <span>User ID: {message.userId}</span>
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 rounded-lg bg-background/60 px-2.5 py-1.5 text-xs text-muted-foreground">
+            <span>Server {message.jobId.slice(0, 8)}</span>
+            <span>User ID {message.userId}</span>
             <span>{relativeTime(new Date(message.timestamp))}</span>
-          </p>
+          </div>
         ) : null}
       </div>
     </div>
