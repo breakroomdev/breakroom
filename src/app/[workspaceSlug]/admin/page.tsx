@@ -4,8 +4,18 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { getMembership } from "@/lib/auth/authorize";
 import { getAdminStats } from "@/lib/services/admin";
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Admin overview" };
+
+type Tone = "primary" | "accent" | "warning" | "destructive";
+
+const TONE_STYLES: Record<Tone, string> = {
+  primary: "bg-primary-100 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300",
+  accent: "bg-accent/15 text-accent-foreground",
+  warning: "bg-warning/15 text-warning-strong",
+  destructive: "bg-destructive/10 text-destructive",
+};
 
 export default async function AdminOverviewPage({ params }: { params: { workspaceSlug: string } }) {
   const user = await getCurrentUser();
@@ -16,13 +26,13 @@ export default async function AdminOverviewPage({ params }: { params: { workspac
 
   const stats = await getAdminStats(membership.workspace.id);
 
-  const cards = [
-    { icon: Users, label: "Total members", value: stats.totalMembers },
-    { icon: UserCheck, label: "Active members", value: stats.activeMembers },
-    { icon: Rss, label: "Posts this week", value: stats.postsThisWeek },
-    { icon: BarChart3, label: "Total polls", value: stats.totalPolls },
-    { icon: CalendarDays, label: "Upcoming shifts", value: stats.upcomingShifts },
-    { icon: Flag, label: "Open reports", value: stats.openReports, alert: stats.openReports > 0 },
+  const cards: { icon: typeof Users; label: string; value: number; tone: Tone }[] = [
+    { icon: Users, label: "Total members", value: stats.totalMembers, tone: "primary" },
+    { icon: UserCheck, label: "Active members", value: stats.activeMembers, tone: "accent" },
+    { icon: Rss, label: "Posts this week", value: stats.postsThisWeek, tone: "primary" },
+    { icon: BarChart3, label: "Total polls", value: stats.totalPolls, tone: "accent" },
+    { icon: CalendarDays, label: "Upcoming shifts", value: stats.upcomingShifts, tone: "warning" },
+    { icon: Flag, label: "Open reports", value: stats.openReports, tone: stats.openReports > 0 ? "destructive" : "warning" },
   ];
 
   return (
@@ -30,7 +40,7 @@ export default async function AdminOverviewPage({ params }: { params: { workspac
       {cards.map((c) => (
         <Card key={c.label}>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${c.alert ? "bg-destructive/10 text-destructive" : "bg-gradient-brand-soft text-primary"}`}>
+            <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-xl", TONE_STYLES[c.tone])}>
               <c.icon className="h-5 w-5" />
             </div>
             <div>

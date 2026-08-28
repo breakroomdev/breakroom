@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { toast } from "sonner";
+import { KeyRound, MessageSquare } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -39,11 +40,16 @@ export function AuthSettingsForm({ initial }: { initial: Initial }) {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle>Sign-in methods</CardTitle>
-          <CardDescription>Control how members can sign in to this workspace.</CardDescription>
+        <CardHeader className="flex-row items-center gap-3 space-y-0">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300">
+            <KeyRound className="h-4 w-4" />
+          </div>
+          <div>
+            <CardTitle>Sign-in methods</CardTitle>
+            <CardDescription>Control how members can sign in to this workspace.</CardDescription>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
           <label className="flex items-center justify-between rounded-lg border border-border p-3">
             <div>
               <p className="text-sm font-medium">Username & password</p>
@@ -62,23 +68,28 @@ export function AuthSettingsForm({ initial }: { initial: Initial }) {
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Discord SSO</CardTitle>
-          <CardDescription>Let members sign in with Discord, using this instance's shared Discord app.</CardDescription>
+        <CardHeader className="flex-row items-center gap-3 space-y-0">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-accent-foreground">
+            <MessageSquare className="h-4 w-4" />
+          </div>
+          <div>
+            <CardTitle>Discord SSO</CardTitle>
+            <CardDescription>Let members sign in with Discord, using this instance's shared Discord app.</CardDescription>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
           <label className="flex items-center justify-between rounded-lg border border-border p-3">
             <p className="text-sm font-medium">Enable Discord sign-in</p>
             <Switch checked={form.authDiscordEnabled} onCheckedChange={(v) => setForm((f) => ({ ...f, authDiscordEnabled: v }))} />
           </label>
-
-          <div className="flex justify-end">
-            <Button onClick={save} loading={saving}>
-              Save authentication settings
-            </Button>
-          </div>
         </CardContent>
       </Card>
+
+      <div className="flex justify-end">
+        <Button onClick={save} loading={saving}>
+          Save authentication settings
+        </Button>
+      </div>
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Check, Monitor, Moon, Sun } from "lucide-react";
+import { Check, Monitor, Moon, Sun, Palette } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { WORKSPACE_THEMES, THEME_META, COLOR_MODES, type ColorMode, type WorkspaceTheme } from "@/lib/theme";
@@ -30,9 +30,14 @@ export function AppearanceForm({ colorMode, themeOverride, workspaceTheme }: { c
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Appearance</CardTitle>
-        <CardDescription>Personalize how Breakroom looks for you.</CardDescription>
+      <CardHeader className="flex-row items-center gap-3 space-y-0">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-accent-foreground">
+          <Palette className="h-4 w-4" />
+        </div>
+        <div>
+          <CardTitle>Appearance</CardTitle>
+          <CardDescription>Personalize how Breakroom looks for you.</CardDescription>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>

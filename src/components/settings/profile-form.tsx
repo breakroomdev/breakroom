@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { UserRound } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -51,9 +52,14 @@ export function ProfileForm({ initial }: ProfileFormProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Your profile</CardTitle>
-        <CardDescription>This is what teammates see across Breakroom.</CardDescription>
+      <CardHeader className="flex-row items-center gap-3 space-y-0">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300">
+          <UserRound className="h-4 w-4" />
+        </div>
+        <div>
+          <CardTitle>Your profile</CardTitle>
+          <CardDescription>This is what teammates see across Breakroom.</CardDescription>
+        </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={save} className="space-y-4">

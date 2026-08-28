@@ -2,19 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { LucideIcon } from "lucide-react";
+import { LayoutDashboard, Users, ShieldCheck, CalendarDays, LayoutGrid, Plug, Building2, KeyRound, Flag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Permission } from "@/lib/permissions";
 
-const TABS: { label: string; href: string; permission: Permission }[] = [
-  { label: "Overview", href: "", permission: "workspace.manage" },
-  { label: "Members", href: "/members", permission: "members.manage" },
-  { label: "Roles", href: "/roles", permission: "roles.manage" },
-  { label: "Schedule", href: "/schedule", permission: "schedule.manage" },
-  { label: "Hub", href: "/hub", permission: "workspace.manage" },
-  { label: "Integrations", href: "/integrations", permission: "workspace.manage" },
-  { label: "Workspace", href: "/workspace", permission: "workspace.manage" },
-  { label: "Authentication", href: "/auth", permission: "workspace.manage" },
-  { label: "Moderation", href: "/moderation", permission: "posts.moderate" },
+const TABS: { label: string; href: string; permission: Permission; icon: LucideIcon }[] = [
+  { label: "Overview", href: "", permission: "workspace.manage", icon: LayoutDashboard },
+  { label: "Members", href: "/members", permission: "members.manage", icon: Users },
+  { label: "Roles", href: "/roles", permission: "roles.manage", icon: ShieldCheck },
+  { label: "Schedule", href: "/schedule", permission: "schedule.manage", icon: CalendarDays },
+  { label: "Hub", href: "/hub", permission: "workspace.manage", icon: LayoutGrid },
+  { label: "Integrations", href: "/integrations", permission: "workspace.manage", icon: Plug },
+  { label: "Workspace", href: "/workspace", permission: "workspace.manage", icon: Building2 },
+  { label: "Authentication", href: "/auth", permission: "workspace.manage", icon: KeyRound },
+  { label: "Moderation", href: "/moderation", permission: "posts.moderate", icon: Flag },
 ];
 
 export function AdminNav({ basePath, permissions }: { basePath: string; permissions: string[] }) {
@@ -32,10 +34,11 @@ export function AdminNav({ basePath, permissions }: { basePath: string; permissi
             key={tab.href}
             href={href}
             className={cn(
-              "shrink-0 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors",
+              "flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors",
               isActive ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
             )}
           >
+            <tab.icon className="h-4 w-4" />
             {tab.label}
           </Link>
         );

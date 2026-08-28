@@ -21,6 +21,7 @@ export default async function AdminWorkspacePage({ params }: { params: { workspa
         logoUrl: membership.workspace.logoUrl,
         theme: membership.workspace.theme,
       }}
+      isOwner={membership.member.userId === membership.workspace.ownerId}
     />
   );
 }

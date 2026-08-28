@@ -3,12 +3,13 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Check, AlertTriangle } from "lucide-react";
+import { Check, AlertTriangle, Building2, LinkIcon, Palette, ShieldAlert } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { AvatarUpload } from "@/components/settings/avatar-upload";
 import { useWorkspace } from "@/components/workspace-context";
 import { WORKSPACE_THEMES, THEME_META, type WorkspaceTheme } from "@/lib/theme";
@@ -22,7 +23,7 @@ interface Initial {
   theme: string;
 }
 
-export function WorkspaceSettingsForm({ initial }: { initial: Initial }) {
+export function WorkspaceSettingsForm({ initial, isOwner }: { initial: Initial; isOwner: boolean }) {
   const router = useRouter();
   const { workspace } = useWorkspace();
   const [form, setForm] = React.useState(initial);
@@ -48,9 +49,14 @@ export function WorkspaceSettingsForm({ initial }: { initial: Initial }) {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle>General</CardTitle>
-          <CardDescription>Basic information about your workspace.</CardDescription>
+        <CardHeader className="flex-row items-center gap-3 space-y-0">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300">
+            <Building2 className="h-4 w-4" />
+          </div>
+          <div>
+            <CardTitle>General</CardTitle>
+            <CardDescription>Basic information about your workspace.</CardDescription>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <AvatarUpload name={form.name} url={form.logoUrl} onChange={(url) => save({ logoUrl: url })} />
@@ -72,9 +78,14 @@ export function WorkspaceSettingsForm({ initial }: { initial: Initial }) {
       <WorkspaceSlugForm currentSlug={workspace.slug} />
 
       <Card>
-        <CardHeader>
-          <CardTitle>Workspace theme</CardTitle>
-          <CardDescription>The default look for everyone in this workspace. Members can override it in their personal settings.</CardDescription>
+        <CardHeader className="flex-row items-center gap-3 space-y-0">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-accent-foreground">
+            <Palette className="h-4 w-4" />
+          </div>
+          <div>
+            <CardTitle>Workspace theme</CardTitle>
+            <CardDescription>The default look for everyone in this workspace. Members can override it in their personal settings.</CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -92,6 +103,8 @@ export function WorkspaceSettingsForm({ initial }: { initial: Initial }) {
           </div>
         </CardContent>
       </Card>
+
+      {isOwner ? <DangerZoneCard /> : null}
     </div>
   );
 }
@@ -129,9 +142,14 @@ function WorkspaceSlugForm({ currentSlug }: { currentSlug: string }) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Workspace URL</CardTitle>
-        <CardDescription>This is the address your team uses to sign in and access this workspace.</CardDescription>
+      <CardHeader className="flex-row items-center gap-3 space-y-0">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300">
+          <LinkIcon className="h-4 w-4" />
+        </div>
+        <div>
+          <CardTitle>Workspace URL</CardTitle>
+          <CardDescription>This is the address your team uses to sign in and access this workspace.</CardDescription>
+        </div>
       </CardHeader>
       <CardContent className="space-y-3">
         <Field label="URL" htmlFor="slug">
@@ -167,5 +185,86 @@ function WorkspaceSlugForm({ currentSlug }: { currentSlug: string }) {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function DangerZoneCard() {
+  const { workspace } = useWorkspace();
+  const [open, setOpen] = React.useState(false);
+  const [confirmText, setConfirmText] = React.useState("");
+  const [deleting, setDeleting] = React.useState(false);
+
+  async function confirmDelete() {
+    if (confirmText !== workspace.slug) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/workspaces/${workspace.slug}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error?.message ?? "Couldn't delete this workspace.");
+        return;
+      }
+      toast.success(`${workspace.name} deleted`);
+      const root = process.env.NEXT_PUBLIC_APP_URL;
+      window.location.href = root ? `${root}/workspaces` : "/workspaces";
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <>
+      <Card className="border-destructive/40">
+        <CardHeader className="flex-row items-center gap-3 space-y-0">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+            <ShieldAlert className="h-4 w-4" />
+          </div>
+          <div>
+            <CardTitle>Danger zone</CardTitle>
+            <CardDescription>Irreversible actions — proceed with care.</CardDescription>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+            <div>
+              <p className="text-sm font-medium">Delete this workspace</p>
+              <p className="text-xs text-muted-foreground">Permanently deletes {workspace.name} and everything in it. There's no undo.</p>
+            </div>
+            <Button variant="destructive" onClick={() => setOpen(true)}>
+              Delete workspace
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Dialog
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next);
+          if (!next) setConfirmText("");
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete {workspace.name}?</DialogTitle>
+            <DialogDescription>
+              This permanently deletes the workspace and everything in it — posts, members, schedules, polls, files. There's no
+              undo.
+            </DialogDescription>
+          </DialogHeader>
+          <Field label={`Type "${workspace.slug}" to confirm`} htmlFor="confirm-delete-slug">
+            <Input id="confirm-delete-slug" value={confirmText} onChange={(e) => setConfirmText(e.target.value)} autoComplete="off" />
+          </Field>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setOpen(false)} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete} disabled={confirmText !== workspace.slug} loading={deleting}>
+              Delete permanently
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

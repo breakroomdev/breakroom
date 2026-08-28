@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { toast } from "sonner";
+import { KeyRound } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -36,9 +37,14 @@ export function PasswordForm({ hasPassword }: { hasPassword: boolean }) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Password</CardTitle>
-        <CardDescription>{hasPassword ? "Change your password." : "Set a password to also sign in without Discord."}</CardDescription>
+      <CardHeader className="flex-row items-center gap-3 space-y-0">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-warning/15 text-warning-strong">
+          <KeyRound className="h-4 w-4" />
+        </div>
+        <div>
+          <CardTitle>Password</CardTitle>
+          <CardDescription>{hasPassword ? "Change your password." : "Set a password to also sign in without Discord."}</CardDescription>
+        </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={save} className="space-y-4">

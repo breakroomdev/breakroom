@@ -1,9 +1,10 @@
 import { and, eq, ne } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { requireWorkspaceContext } from "@/lib/api/workspace-route";
-import { requirePermission } from "@/lib/auth/authorize";
+import { requirePermission, ForbiddenError } from "@/lib/auth/authorize";
 import { updateWorkspaceSchema } from "@/lib/validation/workspace";
 import { RESERVED_SLUGS } from "@/lib/constants";
+import { deleteWorkspace } from "@/lib/services/staff";
 import { jsonError, jsonOk, withErrorHandling } from "@/lib/api/response";
 import { isSameOriginRequest } from "@/lib/api/csrf";
 
@@ -40,4 +41,20 @@ export const PATCH = withErrorHandling(async (req: Request, { params }: { params
     .returning();
 
   return jsonOk({ workspace: updated });
+});
+
+/** Permanently deletes the workspace and everything in it. Owner-only — even an Admin with workspace.manage can't do this. */
+export const DELETE = withErrorHandling(async (req: Request, { params }: { params: { slug: string } }) => {
+  if (!isSameOriginRequest(req)) return jsonError("Invalid request origin", 403);
+
+  const { membership } = await requireWorkspaceContext(params.slug);
+  requirePermission(membership, "workspace.manage");
+
+  if (membership.member.userId !== membership.workspace.ownerId) {
+    throw new ForbiddenError("Only the workspace owner can delete this workspace.");
+  }
+
+  await deleteWorkspace(membership.workspace.id);
+
+  return jsonOk({ success: true });
 });
