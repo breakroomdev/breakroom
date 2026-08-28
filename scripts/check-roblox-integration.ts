@@ -10,6 +10,9 @@ async function main() {
   const client = createClient({ url, authToken: process.env.DATABASE_AUTH_TOKEN });
   const db = drizzle(client, { schema });
 
+  const allRows = await db.query.integrations.findMany();
+  console.log("ALL integrations (any type), count:", allRows.length);
+
   const rows = await db.query.integrations.findMany({ where: eq(schema.integrations.type, "roblox_chat") });
 
   console.log(
