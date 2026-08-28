@@ -30,19 +30,21 @@ local PLACE_ID = "${opts.placeId}"
 
 local JOB_ID = game.JobId ~= "" and game.JobId or "studio-session"
 
--- Basic retry + de-dupe bookkeeping. Roblox's TextChatService can fire more
--- than once for the same message in rare edge cases, so we track a short
--- rolling window of recently-sent message signatures.
-local recentlySent = {}
-local RECENT_WINDOW_SECONDS = 5
+-- TextChannel.ShouldDeliverCallback runs once PER RECEIVING CLIENT (the sender
+-- counts as a receiver too), so the same message shows up multiple times when
+-- there's more than one player in the server. TextChatMessage.MessageId is a
+-- unique per-message identifier, so we track which ones we've already
+-- forwarded rather than trying to de-dupe on text/time like a naive approach.
+local forwardedMessageIds = {}
+local RECENT_WINDOW_SECONDS = 30
 local MAX_RETRIES = 3
 local RETRY_DELAY_SECONDS = 1.5
 
-local function pruneRecentlySent()
+local function pruneForwarded()
 	local now = os.clock()
-	for key, sentAt in pairs(recentlySent) do
-		if now - sentAt > RECENT_WINDOW_SECONDS then
-			recentlySent[key] = nil
+	for id, seenAt in pairs(forwardedMessageIds) do
+		if now - seenAt > RECENT_WINDOW_SECONDS then
+			forwardedMessageIds[id] = nil
 		end
 	end
 end
@@ -89,8 +91,14 @@ local function sendChatMessage(payload)
 	return false
 end
 
-local function onIncomingMessage(textChatMessage)
-	print("[Breakroom] TextChatService.MessageReceived fired.")
+local function forwardMessage(textChatMessage)
+	local messageId = textChatMessage.MessageId
+
+	pruneForwarded()
+	if forwardedMessageIds[messageId] then
+		return
+	end
+	forwardedMessageIds[messageId] = os.clock()
 
 	-- Only forward real player chat, not system/status messages.
 	local speaker = textChatMessage.TextSource
@@ -112,14 +120,6 @@ local function onIncomingMessage(textChatMessage)
 		print("[Breakroom] Skipped — empty message text (likely filtered to nothing).")
 		return
 	end
-
-	pruneRecentlySent()
-	local dedupeKey = player.UserId .. ":" .. text .. ":" .. tostring(math.floor(os.clock()))
-	if recentlySent[dedupeKey] then
-		print("[Breakroom] Skipped — duplicate of a message just sent.")
-		return
-	end
-	recentlySent[dedupeKey] = os.clock()
 
 	local payload = {
 		universeId = UNIVERSE_ID,
@@ -144,7 +144,30 @@ local function onIncomingMessage(textChatMessage)
 	end)
 end
 
-TextChatService.MessageReceived:Connect(onIncomingMessage)
+-- TextChatService.MessageReceived (and OnIncomingMessage) only fire on the
+-- CLIENT — Roblox's docs are explicit about this. A server Script can
+-- :Connect() to them without erroring, but the handler never runs, which is
+-- why chat silently never reached Breakroom. TextChannel.ShouldDeliverCallback
+-- is the one hook Roblox documents as server-only, so we bind it on every
+-- text channel (including ones created later, like team or whisper channels)
+-- purely to observe messages — it always returns true so delivery to players
+-- is completely unaffected.
+local function watchChannel(channel)
+	if not channel:IsA("TextChannel") then
+		return
+	end
+	channel.ShouldDeliverCallback = function(message, _textSource)
+		forwardMessage(message)
+		return true
+	end
+	print("[Breakroom] Watching chat channel: " .. channel.Name)
+end
+
+local channelsFolder = TextChatService:WaitForChild("TextChannels")
+for _, channel in ipairs(channelsFolder:GetChildren()) do
+	watchChannel(channel)
+end
+channelsFolder.ChildAdded:Connect(watchChannel)
 
 print("[Breakroom] Roblox Chat Logger connected — forwarding chat to Breakroom.")
 print("[Breakroom] Endpoint: " .. BREAKROOM_API_URL .. " | Universe " .. UNIVERSE_ID .. " | Place " .. PLACE_ID)
