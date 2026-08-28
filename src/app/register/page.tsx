@@ -15,9 +15,9 @@ export const metadata = { title: "Create your account" };
 async function getJoinWorkspace(slug?: string) {
   if (!slug) return null;
   const db = await getDb();
-  const workspace = await db.query.workspaces.findFirst({ where: eq(schema.workspaces.slug, slug) });
+  const workspace = await db.query.workspaces.findFirst({ where: eq(schema.workspaces.slug, slug), with: { settings: true } });
   if (!workspace) return null;
-  const settings = await db.query.workspaceSettings.findFirst({ where: eq(schema.workspaceSettings.workspaceId, workspace.id) });
+  const settings = workspace.settings;
   return {
     name: workspace.name,
     slug: workspace.slug,

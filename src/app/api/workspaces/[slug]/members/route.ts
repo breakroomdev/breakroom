@@ -13,14 +13,16 @@ export const GET = withErrorHandling(async (_req: Request, { params }: { params:
   requirePermission(membership, "members.manage");
 
   const db = await getDb();
-  const rows = await db
-    .select({ member: schema.workspaceMembers, user: schema.users, role: schema.roles })
-    .from(schema.workspaceMembers)
-    .innerJoin(schema.users, eq(schema.users.id, schema.workspaceMembers.userId))
-    .innerJoin(schema.roles, eq(schema.roles.id, schema.workspaceMembers.roleId))
-    .where(eq(schema.workspaceMembers.workspaceId, membership.workspace.id));
-
-  const invites = await db.query.invites.findMany({ where: eq(schema.invites.workspaceId, membership.workspace.id) });
+  const [rows, invites, roles] = await Promise.all([
+    db
+      .select({ member: schema.workspaceMembers, user: schema.users, role: schema.roles })
+      .from(schema.workspaceMembers)
+      .innerJoin(schema.users, eq(schema.users.id, schema.workspaceMembers.userId))
+      .innerJoin(schema.roles, eq(schema.roles.id, schema.workspaceMembers.roleId))
+      .where(eq(schema.workspaceMembers.workspaceId, membership.workspace.id)),
+    db.query.invites.findMany({ where: eq(schema.invites.workspaceId, membership.workspace.id) }),
+    db.query.roles.findMany({ where: eq(schema.roles.workspaceId, membership.workspace.id) }),
+  ]);
 
   return jsonOk({
     members: rows.map((r) => ({
@@ -33,7 +35,7 @@ export const GET = withErrorHandling(async (_req: Request, { params }: { params:
     pendingInvites: invites
       .filter((i) => !i.acceptedAt && i.expiresAt.getTime() > Date.now())
       .map((i) => ({ id: i.id, email: i.email, createdAt: i.createdAt.getTime() })),
-    roles: await db.query.roles.findMany({ where: eq(schema.roles.workspaceId, membership.workspace.id) }),
+    roles,
   });
 });
 

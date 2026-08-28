@@ -52,6 +52,7 @@ export const sessions = sqliteTable(
   },
   (t) => ({
     userIdx: index("sessions_user_idx").on(t.userId),
+    tokenHashIdx: uniqueIndex("sessions_token_hash_idx").on(t.tokenHash),
   })
 );
 
@@ -70,14 +71,20 @@ export const oauthAccounts = sqliteTable(
   })
 );
 
-export const passwordResetTokens = sqliteTable("password_reset_tokens", {
-  id: id(),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  tokenHash: text("token_hash").notNull(),
-  expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
-  usedAt: integer("used_at", { mode: "timestamp_ms" }),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
-});
+export const passwordResetTokens = sqliteTable(
+  "password_reset_tokens",
+  {
+    id: id(),
+    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull(),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+    usedAt: integer("used_at", { mode: "timestamp_ms" }),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
+  },
+  (t) => ({
+    tokenHashIdx: uniqueIndex("password_reset_tokens_token_hash_idx").on(t.tokenHash),
+  })
+);
 
 // ─────────────────────────────────────────────────────────────
 // Workspaces, membership, roles
@@ -155,6 +162,7 @@ export const invites = sqliteTable(
   },
   (t) => ({
     workspaceIdx: index("invites_workspace_idx").on(t.workspaceId),
+    tokenHashIdx: uniqueIndex("invites_token_hash_idx").on(t.tokenHash),
   })
 );
 

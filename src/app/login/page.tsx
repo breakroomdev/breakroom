@@ -20,14 +20,13 @@ async function getWorkspaceAuthContext(workspaceSlug?: string) {
 
   if (workspaceSlug) {
     const db = await getDb();
-    const found = await db.query.workspaces.findFirst({ where: eq(schema.workspaces.slug, workspaceSlug) });
+    const found = await db.query.workspaces.findFirst({ where: eq(schema.workspaces.slug, workspaceSlug), with: { settings: true } });
     if (found) {
       workspace = { name: found.name, slug: found.slug, logoUrl: found.logoUrl };
-      const settings = await db.query.workspaceSettings.findFirst({ where: eq(schema.workspaceSettings.workspaceId, found.id) });
-      if (settings) {
-        passwordEnabled = settings.authPasswordEnabled;
-        discordEnabled = discordEnabled || Boolean(settings.authDiscordEnabled && settings.discordClientId);
-        allowSelfRegistration = settings.allowSelfRegistration;
+      if (found.settings) {
+        passwordEnabled = found.settings.authPasswordEnabled;
+        discordEnabled = discordEnabled || Boolean(found.settings.authDiscordEnabled && found.settings.discordClientId);
+        allowSelfRegistration = found.settings.allowSelfRegistration;
       }
     }
   }

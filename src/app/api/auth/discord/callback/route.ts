@@ -79,9 +79,9 @@ export async function GET(req: Request) {
 
     let redirectPath = "/workspaces";
     if (workspaceSlug) {
-      const workspace = await db.query.workspaces.findFirst({ where: eq(schema.workspaces.slug, workspaceSlug) });
+      const workspace = await db.query.workspaces.findFirst({ where: eq(schema.workspaces.slug, workspaceSlug), with: { settings: true } });
       if (workspace) {
-        const settings = await db.query.workspaceSettings.findFirst({ where: eq(schema.workspaceSettings.workspaceId, workspace.id) });
+        const settings = workspace.settings;
         const existingMembership = await db.query.workspaceMembers.findFirst({
           where: (m, { and, eq }) => and(eq(m.workspaceId, workspace.id), eq(m.userId, userId)),
         });

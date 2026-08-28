@@ -13,9 +13,9 @@ export const OAUTH_STATE_COOKIE = "bx_oauth_nonce";
 export async function resolveDiscordConfig(workspaceSlug: string | null): Promise<OAuthProviderConfig | null> {
   if (workspaceSlug) {
     const db = await getDb();
-    const workspace = await db.query.workspaces.findFirst({ where: eq(schema.workspaces.slug, workspaceSlug) });
+    const workspace = await db.query.workspaces.findFirst({ where: eq(schema.workspaces.slug, workspaceSlug), with: { settings: true } });
     if (workspace) {
-      const settings = await db.query.workspaceSettings.findFirst({ where: eq(schema.workspaceSettings.workspaceId, workspace.id) });
+      const settings = workspace.settings;
       if (settings?.authDiscordEnabled && settings.discordClientId && settings.discordClientSecret) {
         return {
           clientId: settings.discordClientId,
