@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { Search, SlidersHorizontal, X, ChevronDown, Gamepad2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -46,8 +47,31 @@ export function RobloxChatViewer({
   const [filters, setFilters] = React.useState<Filters>(EMPTY_FILTERS);
   const [appliedFilters, setAppliedFilters] = React.useState<Filters>(EMPTY_FILTERS);
   const [showFilters, setShowFilters] = React.useState(false);
+  const [avatars, setAvatars] = React.useState<Record<number, string | null>>({});
   const hasFilters = Object.values(appliedFilters).some(Boolean);
   const latestTimestampRef = React.useRef<number | null>(initialMessages[0]?.timestamp ?? null);
+  const fetchedUserIdsRef = React.useRef<Set<number>>(new Set());
+
+  // Real Roblox avatars, fetched once per unique player in view (the profile
+  // endpoint caches them server-side, so re-renders never re-hit Roblox's API).
+  React.useEffect(() => {
+    const toFetch = new Map<number, { username: string; displayName: string }>();
+    for (const m of messages) {
+      if (!fetchedUserIdsRef.current.has(m.userId)) {
+        toFetch.set(m.userId, { username: m.username, displayName: m.displayName });
+      }
+    }
+    if (toFetch.size === 0) return;
+    toFetch.forEach((info, userId) => {
+      fetchedUserIdsRef.current.add(userId);
+      fetch(`/api/roblox/profile/${userId}?username=${encodeURIComponent(info.username)}&displayName=${encodeURIComponent(info.displayName)}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.profile) setAvatars((prev) => ({ ...prev, [userId]: data.profile.avatarUrl }));
+        })
+        .catch(() => {});
+    });
+  }, [messages]);
 
   const baseUrl = `/api/workspaces/${workspace.slug}/integrations/${integrationId}/messages`;
 
@@ -176,7 +200,7 @@ export function RobloxChatViewer({
       ) : (
         <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
           {messages.map((m) => (
-            <ChatMessageRow key={m.id} message={m} />
+            <ChatMessageRow key={m.id} message={m} avatarUrl={avatars[m.userId]} />
           ))}
         </div>
       )}
@@ -206,15 +230,19 @@ function avatarTone(username: string) {
   return AVATAR_TONES[hash % AVATAR_TONES.length];
 }
 
-function ChatMessageRow({ message }: { message: RobloxMessage }) {
+function ChatMessageRow({ message, avatarUrl }: { message: RobloxMessage; avatarUrl?: string | null }) {
   const [expanded, setExpanded] = React.useState(false);
 
   return (
     <div className={cn("group flex gap-3 p-3.5 transition-colors hover:bg-muted/40", expanded && "bg-muted/40")}>
       <div className="relative shrink-0">
-        <div className={cn("flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold", avatarTone(message.username))}>
-          {message.displayName.slice(0, 1).toUpperCase()}
-        </div>
+        {avatarUrl ? (
+          <Image src={avatarUrl} alt="" width={40} height={40} unoptimized className="h-10 w-10 rounded-full object-cover" />
+        ) : (
+          <div className={cn("flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold", avatarTone(message.username))}>
+            {message.displayName.slice(0, 1).toUpperCase()}
+          </div>
+        )}
         <div className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border-2 border-card bg-[#00A2FF] text-white">
           <Gamepad2 className="h-2 w-2" />
         </div>
