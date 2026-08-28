@@ -59,6 +59,14 @@ heavyweight than enterprise HR software.
   of every workspace.
 - **Privacy controls** — members can hide their email from the team directory (still visible
   to workspace admins).
+- **Integrations** — a generic per-workspace integration framework (Admin → Integrations),
+  built so new integration types are just a registry entry + their own config/view components
+  away, not a one-off rewrite. Ships with **Roblox Chat Logger**: connect a Roblox experience
+  via a guided wizard, get a ready-to-paste server script, and watch its in-game chat show up
+  live in a dedicated Breakroom chat log — searchable, filterable by player/server/date, with
+  clickable Roblox profiles (cached avatar + username lookups). Authenticated by a hashed,
+  regenerable per-integration secret; Roblox's own chat filtering is trusted as-is, never
+  re-filtered or bypassed.
 
 ## Tech stack
 

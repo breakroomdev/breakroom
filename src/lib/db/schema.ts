@@ -398,6 +398,69 @@ export const notifications = sqliteTable(
 );
 
 // ─────────────────────────────────────────────────────────────
+// Integrations — generic per-workspace connections (Roblox, and
+// whatever comes later) plus the Roblox chat logger's own data.
+// ─────────────────────────────────────────────────────────────
+
+export const integrations = sqliteTable(
+  "integrations",
+  {
+    id: id(),
+    workspaceId: text("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
+    type: text("type").notNull(), // e.g. "roblox_chat" — a free-text type key, not an enum, so new integration types don't need a migration
+    name: text("name").notNull(),
+    enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+    config: text("config", { mode: "json" }).$type<Record<string, unknown>>().notNull().default(sql`'{}'`),
+    secretHash: text("secret_hash"),
+    secretLastFour: text("secret_last_four"),
+    lastActivityAt: integer("last_activity_at", { mode: "timestamp_ms" }),
+    lastErrorAt: integer("last_error_at", { mode: "timestamp_ms" }),
+    lastError: text("last_error"),
+    messageCount: integer("message_count").notNull().default(0),
+    createdBy: text("created_by").notNull().references(() => users.id),
+    ...timestamps,
+  },
+  (t) => ({
+    workspaceIdx: index("integrations_workspace_idx").on(t.workspaceId),
+    secretHashIdx: uniqueIndex("integrations_secret_hash_idx").on(t.secretHash),
+  })
+);
+
+export const robloxChatMessages = sqliteTable(
+  "roblox_chat_messages",
+  {
+    id: id(),
+    workspaceId: text("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
+    integrationId: text("integration_id").notNull().references(() => integrations.id, { onDelete: "cascade" }),
+    universeId: text("universe_id").notNull(),
+    placeId: text("place_id").notNull(),
+    jobId: text("job_id").notNull(),
+    userId: integer("user_id").notNull(), // Roblox user id
+    username: text("username").notNull(),
+    displayName: text("display_name").notNull(),
+    message: text("message").notNull(),
+    timestamp: integer("timestamp", { mode: "timestamp_ms" }).notNull(), // when Roblox sent it
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()), // when we received it
+  },
+  (t) => ({
+    workspaceIdx: index("roblox_chat_messages_workspace_idx").on(t.workspaceId, t.timestamp),
+    integrationIdx: index("roblox_chat_messages_integration_idx").on(t.integrationId, t.timestamp),
+    userIdx: index("roblox_chat_messages_user_idx").on(t.userId),
+    usernameIdx: index("roblox_chat_messages_username_idx").on(t.username),
+    timestampIdx: index("roblox_chat_messages_timestamp_idx").on(t.timestamp),
+  })
+);
+
+/** Cached Roblox avatar/profile lookups so we don't hit Roblox's API on every message render. */
+export const robloxProfileCache = sqliteTable("roblox_profile_cache", {
+  userId: integer("user_id").primaryKey(),
+  username: text("username").notNull(),
+  displayName: text("display_name").notNull(),
+  avatarUrl: text("avatar_url"),
+  fetchedAt: integer("fetched_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
+});
+
+// ─────────────────────────────────────────────────────────────
 // Staff — instance-wide announcements broadcast to every user
 // ─────────────────────────────────────────────────────────────
 

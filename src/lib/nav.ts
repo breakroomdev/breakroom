@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Home, Rss, CalendarDays, BarChart3, Image, Users, Bell, Settings, ShieldCheck, LayoutGrid } from "lucide-react";
+import { Home, Rss, CalendarDays, BarChart3, Image, Users, Bell, Settings, ShieldCheck, LayoutGrid, Plug } from "lucide-react";
 
 export interface NavItem {
   label: string;
@@ -15,6 +15,7 @@ export const PRIMARY_NAV: NavItem[] = [
   { label: "Media", href: "/media", icon: Image },
   { label: "Team", href: "/team", icon: Users },
   { label: "Hub", href: "/hub", icon: LayoutGrid },
+  { label: "Integrations", href: "/integrations", icon: Plug },
 ];
 
 export const SECONDARY_NAV: NavItem[] = [
