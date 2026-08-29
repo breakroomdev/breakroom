@@ -1,12 +1,11 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { Search, BookOpen, FileText } from "lucide-react";
+import { Search, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { relativeTime } from "@/lib/utils";
+import { CategoryGrid } from "@/components/kb/category-grid";
+import { ArticleList } from "@/components/kb/article-list";
 
 interface HelpArticleSummary {
   id: string;
@@ -16,22 +15,35 @@ interface HelpArticleSummary {
   updatedAt: number;
 }
 
-export function HelpBrowser({ initialArticles }: { initialArticles: HelpArticleSummary[] }) {
+interface HelpCategorySummary {
+  category: string | null;
+  count: number;
+}
+
+export function HelpBrowser({ initialCategories }: { initialCategories: HelpCategorySummary[] }) {
   const [q, setQ] = React.useState("");
-  const [articles, setArticles] = React.useState(initialArticles);
-  const [loading, setLoading] = React.useState(false);
+  const [searchResults, setSearchResults] = React.useState<HelpArticleSummary[] | null>(null);
+  const [searching, setSearching] = React.useState(false);
 
   React.useEffect(() => {
+    if (!q) {
+      setSearchResults(null);
+      return;
+    }
     const handle = setTimeout(async () => {
-      setLoading(true);
+      setSearching(true);
       try {
-        const url = q ? `/api/help?q=${encodeURIComponent(q)}` : `/api/help`;
-        const res = await fetch(url);
+        const res = await fetch(`/api/help?q=${encodeURIComponent(q)}`);
         if (!res.ok) return;
         const data = await res.json();
-        setArticles(data.articles.map((a: { id: string; title: string; slug: string; category: string | null; updatedAt: string }) => ({ ...a, updatedAt: new Date(a.updatedAt).getTime() })));
+        setSearchResults(
+          data.articles.map((a: { id: string; title: string; slug: string; category: string | null; updatedAt: string }) => ({
+            ...a,
+            updatedAt: new Date(a.updatedAt).getTime(),
+          }))
+        );
       } finally {
-        setLoading(false);
+        setSearching(false);
       }
     }, 250);
     return () => clearTimeout(handle);
@@ -44,31 +56,18 @@ export function HelpBrowser({ initialArticles }: { initialArticles: HelpArticleS
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search help articles…" className="pl-9" />
       </div>
 
-      {articles.length === 0 ? (
-        <EmptyState
-          icon={<BookOpen className="h-6 w-6" />}
-          title={q ? "No articles match your search" : "No help articles yet"}
-        />
+      {q ? (
+        searchResults === null || searching ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">Searching…</p>
+        ) : searchResults.length === 0 ? (
+          <EmptyState icon={<BookOpen className="h-6 w-6" />} title="No articles match your search" />
+        ) : (
+          <ArticleList articles={searchResults} buildHref={(slug) => `/help/${slug}`} />
+        )
+      ) : initialCategories.length === 0 ? (
+        <EmptyState icon={<BookOpen className="h-6 w-6" />} title="No help articles yet" />
       ) : (
-        <div className={loading ? "space-y-2 opacity-60 transition-opacity" : "space-y-2 transition-opacity"}>
-          {articles.map((a) => (
-            <Link key={a.id} href={`/help/${a.slug}`}>
-              <Card className="transition-all hover:-translate-y-0.5 hover:shadow-card-hover">
-                <CardContent className="flex items-center gap-3 p-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300">
-                    <FileText className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{a.title}</p>
-                    <p className="truncate text-xs text-muted-foreground" suppressHydrationWarning>
-                      {a.category ? `${a.category} · ` : ""}Updated {relativeTime(new Date(a.updatedAt))}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+        <CategoryGrid categories={initialCategories} baseHref="/help/category" />
       )}
     </div>
   );

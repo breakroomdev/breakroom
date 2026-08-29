@@ -4,6 +4,8 @@ import { getDb, schema } from "@/lib/db";
 
 export interface ListKbArticlesOptions {
   q?: string;
+  /** Pass a string to filter to that category, or null to filter to uncategorized articles. Omit to not filter by category at all. */
+  category?: string | null;
   /** Include drafts — only for admin contexts. */
   includeUnpublished?: boolean;
 }
@@ -19,10 +21,36 @@ export async function listKbArticles(workspaceId: string, options: ListKbArticle
     const like_ = `%${options.q}%`;
     conditions.push(or(like(schema.kbArticles.title, like_), like(schema.kbArticles.content, like_))!);
   }
+  if (options.category !== undefined) {
+    conditions.push(options.category === null ? isNull(schema.kbArticles.category) : eq(schema.kbArticles.category, options.category));
+  }
 
   return db.query.kbArticles.findMany({
     where: and(...conditions),
     orderBy: [asc(schema.kbArticles.title)],
+  });
+}
+
+export interface KbCategorySummary {
+  category: string | null;
+  count: number;
+}
+
+/** Distinct categories (published articles only) with their article counts, for the category-browse index. */
+export async function listKbCategories(workspaceId: string): Promise<KbCategorySummary[]> {
+  const db = await getDb();
+  const rows = await db
+    .select({ category: schema.kbArticles.category, value: count() })
+    .from(schema.kbArticles)
+    .where(and(eq(schema.kbArticles.workspaceId, workspaceId), eq(schema.kbArticles.status, "published")))
+    .groupBy(schema.kbArticles.category);
+
+  const summaries = rows.map((r) => ({ category: r.category, count: r.value }));
+  // Alphabetical, with the uncategorized bucket (category: null) always last.
+  return summaries.sort((a, b) => {
+    if (a.category === null) return 1;
+    if (b.category === null) return -1;
+    return a.category.localeCompare(b.category);
   });
 }
 
