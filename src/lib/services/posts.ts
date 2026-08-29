@@ -1,6 +1,17 @@
 import "server-only";
 import { and, count, desc, eq, inArray, lt, sql } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
+import { detectArticleLink } from "@/lib/kb-link-detect";
+import { getKbArticleBySlug } from "@/lib/services/kb";
+import { getHelpArticleBySlug } from "@/lib/services/help";
+
+export interface LinkedArticlePreview {
+  kind: "kb" | "help";
+  title: string;
+  excerpt: string;
+  slug: string;
+  category: string | null;
+}
 
 export interface FeedPost {
   id: string;
@@ -16,6 +27,7 @@ export interface FeedPost {
   reactionCount: number;
   reactedByMe: boolean;
   reactionSummary: { emoji: string; count: number }[];
+  linkedArticle: LinkedArticlePreview | null;
   poll: {
     id: string;
     question: string;
@@ -60,6 +72,30 @@ async function assemblePosts(page: PostRow[], userId: string): Promise<FeedPost[
       ])
     : [[], []];
 
+  // Resolved ahead of the final synchronous map below — must stay a plain
+  // Promise.all + Map, not an async callback inside page.map(), or the
+  // function's declared Promise<FeedPost[]> return type breaks.
+  const linkedArticles = new Map<string, LinkedArticlePreview>();
+  await Promise.all(
+    page.map(async ({ post }) => {
+      if (!post.content) return;
+      const match = detectArticleLink(post.content);
+      if (!match) return;
+
+      const article =
+        match.kind === "kb" ? await getKbArticleBySlug(post.workspaceId, match.slug) : await getHelpArticleBySlug(match.slug);
+      if (!article) return;
+
+      linkedArticles.set(post.id, {
+        kind: match.kind,
+        title: article.title,
+        excerpt: article.content.slice(0, 140),
+        slug: article.slug,
+        category: article.category,
+      });
+    })
+  );
+
   return page.map(({ post, author }) => {
     const postImages = images.filter((i) => i.postId === post.id).sort((a, b) => a.position - b.position);
     const commentCount = commentCounts.find((c) => c.postId === post.id)?.value ?? 0;
@@ -97,6 +133,7 @@ async function assemblePosts(page: PostRow[], userId: string): Promise<FeedPost[
       reactionCount,
       reactedByMe,
       reactionSummary: summary,
+      linkedArticle: linkedArticles.get(post.id) ?? null,
       poll: pollData,
     };
   });

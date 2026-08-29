@@ -13,11 +13,11 @@ export const DELETE = withErrorHandling(async (req: Request, { params }: { param
 
   const db = await getDb();
   const comment = await db.query.comments.findFirst({ where: eq(schema.comments.id, params.id) });
-  if (!comment || !comment.postId) return jsonError("Comment not found", 404);
+  if (!comment || !comment.kbArticleId) return jsonError("Comment not found", 404);
 
-  const post = await db.query.posts.findFirst({ where: eq(schema.posts.id, comment.postId) });
-  if (!post) return jsonError("Post not found", 404);
-  const workspace = await db.query.workspaces.findFirst({ where: eq(schema.workspaces.id, post.workspaceId) });
+  const article = await db.query.kbArticles.findFirst({ where: eq(schema.kbArticles.id, comment.kbArticleId) });
+  if (!article) return jsonError("Article not found", 404);
+  const workspace = await db.query.workspaces.findFirst({ where: eq(schema.workspaces.id, article.workspaceId) });
   if (!workspace) return jsonError("Workspace not found", 404);
 
   const membership = await getMembership(user.id, workspace.slug);

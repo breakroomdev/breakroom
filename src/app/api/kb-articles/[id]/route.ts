@@ -3,17 +3,9 @@ import { getDb, schema } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getMembership, requirePermission } from "@/lib/auth/authorize";
 import { updateKbArticleSchema } from "@/lib/validation/kb";
+import { loadKbArticleContext } from "@/lib/services/kb-context";
 import { jsonError, jsonOk, withErrorHandling } from "@/lib/api/response";
 import { isSameOriginRequest } from "@/lib/api/csrf";
-
-async function loadContext(articleId: string) {
-  const db = await getDb();
-  const article = await db.query.kbArticles.findFirst({ where: eq(schema.kbArticles.id, articleId) });
-  if (!article) return null;
-  const workspace = await db.query.workspaces.findFirst({ where: eq(schema.workspaces.id, article.workspaceId) });
-  if (!workspace) return null;
-  return { article, workspace };
-}
 
 export const PATCH = withErrorHandling(async (req: Request, { params }: { params: { id: string } }) => {
   if (!isSameOriginRequest(req)) return jsonError("Invalid request origin", 403);
@@ -21,7 +13,7 @@ export const PATCH = withErrorHandling(async (req: Request, { params }: { params
   const user = await getCurrentUser();
   if (!user) return jsonError("Not authenticated", 401);
 
-  const ctx = await loadContext(params.id);
+  const ctx = await loadKbArticleContext(params.id);
   if (!ctx) return jsonError("Article not found", 404);
 
   const membership = await getMembership(user.id, ctx.workspace.slug);
@@ -53,7 +45,7 @@ export const DELETE = withErrorHandling(async (req: Request, { params }: { param
   const user = await getCurrentUser();
   if (!user) return jsonError("Not authenticated", 401);
 
-  const ctx = await loadContext(params.id);
+  const ctx = await loadKbArticleContext(params.id);
   if (!ctx) return jsonError("Article not found", 404);
 
   const membership = await getMembership(user.id, ctx.workspace.slug);

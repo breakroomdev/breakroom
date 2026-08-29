@@ -15,6 +15,7 @@ import { ReactionBar } from "@/components/feed/reaction-bar";
 import { PollVoteCard } from "@/components/feed/poll-vote-card";
 import { CommentSection } from "@/components/feed/comment-section";
 import { ReportDialog } from "@/components/feed/report-dialog";
+import { ArticlePreviewCard } from "@/components/feed/article-preview-card";
 import { useWorkspace, useHasPermission } from "@/components/workspace-context";
 import { relativeTime, cn } from "@/lib/utils";
 import type { FeedPost } from "@/lib/services/posts";
@@ -107,7 +108,7 @@ export function PostCard({ post, onChange, onRemove }: { post: FeedPost; onChang
                   </Badge>
                 ) : null}
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground" suppressHydrationWarning>
                 {post.author.jobTitle ? `${post.author.jobTitle} · ` : ""}
                 {relativeTime(post.createdAt)}
                 {post.editedAt ? " · Edited" : ""}
@@ -162,6 +163,8 @@ export function PostCard({ post, onChange, onRemove }: { post: FeedPost; onChang
         ) : (
           post.content && <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed">{post.content}</p>
         )}
+
+        {post.linkedArticle ? <ArticlePreviewCard article={post.linkedArticle} /> : null}
 
         {post.images.length > 0 ? <PostImageGrid images={post.images} authorName={post.author.displayName} /> : null}
 

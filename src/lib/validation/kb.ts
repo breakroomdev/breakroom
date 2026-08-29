@@ -10,3 +10,11 @@ export const kbArticleSchema = z.object({
 });
 
 export const updateKbArticleSchema = kbArticleSchema.partial();
+
+export const kbCommentSchema = z.object({
+  content: z.string().min(1, "Comment can't be empty").max(2000),
+});
+
+export const kbReactionSchema = z.object({
+  emoji: z.string().min(1).max(8),
+});

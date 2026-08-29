@@ -125,7 +125,7 @@ export function KbArticleEditor({ initial }: { initial: KbArticleInitial | null 
       <Card>
         <CardHeader>
           <CardTitle>Content</CardTitle>
-          <CardDescription>Markdown supported — headings, lists, links, bold/italic, code blocks.</CardDescription>
+          <CardDescription>Markdown supported — headings, lists, links, bold/italic, code blocks. Paste a YouTube link on its own line to embed the video.</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="write">

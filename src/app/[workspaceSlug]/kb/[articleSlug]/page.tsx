@@ -3,9 +3,10 @@ import { redirect, notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getMembership } from "@/lib/auth/authorize";
-import { getKbArticleBySlug } from "@/lib/services/kb";
+import { getKbArticleBySlug, getKbArticleEngagement } from "@/lib/services/kb";
 import { getWorkspaceBasePath } from "@/lib/workspace-base-path";
 import { MarkdownContent } from "@/components/kb/markdown-content";
+import { KbArticleEngagement } from "@/components/kb/kb-article-engagement";
 import { formatDate } from "@/lib/utils";
 
 export default async function KbArticlePage({ params }: { params: { workspaceSlug: string; articleSlug: string } }) {
@@ -19,6 +20,7 @@ export default async function KbArticlePage({ params }: { params: { workspaceSlu
   const article = await getKbArticleBySlug(membership.workspace.id, params.articleSlug, { includeUnpublished: canManage });
   if (!article) notFound();
 
+  const engagement = await getKbArticleEngagement(article.id, user.id);
   const basePath = getWorkspaceBasePath(params.workspaceSlug);
 
   return (
@@ -35,6 +37,11 @@ export default async function KbArticlePage({ params }: { params: { workspaceSlu
         <div className="mt-6">
           <MarkdownContent content={article.content} />
         </div>
+
+        <KbArticleEngagement
+          articleId={article.id}
+          initial={{ commentCount: engagement.commentCount, reactionCount: engagement.reactionCount, reactedByMe: engagement.reactedByMe }}
+        />
       </div>
     </div>
   );

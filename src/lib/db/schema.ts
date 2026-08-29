@@ -211,7 +211,12 @@ export const comments = sqliteTable(
   "comments",
   {
     id: id(),
-    postId: text("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+    // Nullable + kbArticleId below: a comment targets a post OR a KB article,
+    // never both — enforced in application code (matches the existing
+    // reactions table's postId/commentId dual-nullable-FK convention, which
+    // also has no DB-level "exactly one" constraint).
+    postId: text("post_id").references(() => posts.id, { onDelete: "cascade" }),
+    kbArticleId: text("kb_article_id").references(() => kbArticles.id, { onDelete: "cascade" }),
     authorId: text("author_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     content: text("content").notNull(),
     deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
@@ -219,6 +224,7 @@ export const comments = sqliteTable(
   },
   (t) => ({
     postIdx: index("comments_post_idx").on(t.postId, t.createdAt),
+    kbArticleIdx: index("comments_kb_article_idx").on(t.kbArticleId, t.createdAt),
   })
 );
 
@@ -228,6 +234,7 @@ export const reactions = sqliteTable(
     id: id(),
     postId: text("post_id").references(() => posts.id, { onDelete: "cascade" }),
     commentId: text("comment_id").references(() => comments.id, { onDelete: "cascade" }),
+    kbArticleId: text("kb_article_id").references(() => kbArticles.id, { onDelete: "cascade" }),
     userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     emoji: text("emoji").notNull().default("👍"),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
@@ -235,6 +242,7 @@ export const reactions = sqliteTable(
   (t) => ({
     postUserIdx: uniqueIndex("reactions_post_user_idx").on(t.postId, t.userId),
     commentUserIdx: uniqueIndex("reactions_comment_user_idx").on(t.commentId, t.userId),
+    kbArticleUserIdx: uniqueIndex("reactions_kb_article_user_idx").on(t.kbArticleId, t.userId),
   })
 );
 
@@ -375,6 +383,8 @@ export const notifications = sqliteTable(
       enum: [
         "comment",
         "reaction",
+        "kb_comment",
+        "kb_reaction",
         "mention",
         "shift_assigned",
         "shift_updated",
@@ -554,6 +564,7 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
 
 export const commentsRelations = relations(comments, ({ one, many }) => ({
   post: one(posts, { fields: [comments.postId], references: [posts.id] }),
+  article: one(kbArticles, { fields: [comments.kbArticleId], references: [kbArticles.id] }),
   author: one(users, { fields: [comments.authorId], references: [users.id] }),
   reactions: many(reactions),
 }));
@@ -573,6 +584,8 @@ export const shiftsRelations = relations(shifts, ({ one }) => ({
   user: one(users, { fields: [shifts.userId], references: [users.id] }),
 }));
 
-export const kbArticlesRelations = relations(kbArticles, ({ one }) => ({
+export const kbArticlesRelations = relations(kbArticles, ({ one, many }) => ({
   workspace: one(workspaces, { fields: [kbArticles.workspaceId], references: [workspaces.id] }),
+  comments: many(comments),
+  reactions: many(reactions),
 }));
