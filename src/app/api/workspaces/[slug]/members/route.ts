@@ -61,11 +61,14 @@ export const POST = withErrorHandling(async (req: Request, { params }: { params:
   });
 
   const inviteUrl = `${process.env.APP_URL}/join/${token}`;
-  await sendEmail(
-    body.email,
-    `You're invited to join ${membership.workspace.name} on Breakroom`,
-    `You've been invited to join ${membership.workspace.name}.\n\nAccept your invite:\n${inviteUrl}\n\nThis link expires in 7 days.`
-  );
+  await sendEmail(body.email, `You're invited to join ${membership.workspace.name} on Breakroom`, {
+    heading: `You're invited to join ${membership.workspace.name}`,
+    paragraphs: [
+      `You've been invited to join ${membership.workspace.name} on Breakroom, your team's workplace hub.`,
+      "This invite link expires in 7 days.",
+    ],
+    cta: { label: "Accept invite", url: inviteUrl },
+  });
 
   return jsonOk({ inviteUrl }, 201);
 });

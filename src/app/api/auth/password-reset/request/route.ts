@@ -30,11 +30,14 @@ export const POST = withErrorHandling(async (req: Request) => {
     });
 
     const resetUrl = `${process.env.APP_URL}/reset-password?token=${token}`;
-    await sendEmail(
-      user.email,
-      "Reset your Breakroom password",
-      `Someone requested a password reset for your Breakroom account.\n\nReset it here (valid for 1 hour):\n${resetUrl}\n\nIf you didn't request this, you can ignore this email.`
-    );
+    await sendEmail(user.email, "Reset your Breakroom password", {
+      heading: "Reset your password",
+      paragraphs: [
+        "Someone requested a password reset for your Breakroom account.",
+        "This link is valid for 1 hour. If you didn't request this, you can safely ignore this email.",
+      ],
+      cta: { label: "Reset password", url: resetUrl },
+    });
   }
 
   return jsonOk({ success: true });
