@@ -81,7 +81,16 @@ function renderEmail({ heading, paragraphs, cta, footer = DEFAULT_FOOTER }: Emai
           <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;width:100%;background-color:#ffffff;border-radius:16px;border:1px solid #e5e7eb;">
             <tr>
               <td style="padding:24px 32px;border-bottom:1px solid #f0f0f0;">
-                <span style="font-size:20px;font-weight:800;color:#111827;letter-spacing:-0.02em;">Break<span style="color:${BRAND_GREEN};">room</span></span>
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding-right:10px;">
+                      <img src="${process.env.APP_URL ?? ""}/email/logo.png" width="28" height="28" alt="" style="display:block;border-radius:8px;" />
+                    </td>
+                    <td>
+                      <span style="font-size:20px;font-weight:800;color:#111827;letter-spacing:-0.02em;">Breakroom</span>
+                    </td>
+                  </tr>
+                </table>
               </td>
             </tr>
             <tr>
