@@ -35,3 +35,13 @@ export async function listShifts(workspaceId: string, start: string, end: string
     user: r.user ? { id: r.user.id, displayName: r.user.displayName, avatarUrl: r.user.avatarUrl } : null,
   }));
 }
+
+export async function listPositions(workspaceId: string) {
+  const db = await getDb();
+  return db.query.positions.findMany({ where: eq(schema.positions.workspaceId, workspaceId), orderBy: [asc(schema.positions.name)] });
+}
+
+export async function listLocations(workspaceId: string) {
+  const db = await getDb();
+  return db.query.locations.findMany({ where: eq(schema.locations.workspaceId, workspaceId), orderBy: [asc(schema.locations.name)] });
+}

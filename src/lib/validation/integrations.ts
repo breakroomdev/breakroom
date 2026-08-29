@@ -8,6 +8,11 @@ export const connectRobloxIntegrationSchema = z.object({
   placeId: numericIdString,
 });
 
+export const connectApiAppSchema = z.object({
+  name: z.string().min(1, "Give it a name").max(80).default("API App"),
+  description: z.string().max(300).optional(),
+});
+
 export const updateIntegrationSchema = z.object({
   name: z.string().min(1).max(80).optional(),
   enabled: z.boolean().optional(),

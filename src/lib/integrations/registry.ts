@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Gamepad2, MessageSquare, Users, Sparkles, Webhook } from "lucide-react";
+import { Gamepad2, MessageSquare, Users, Sparkles, Webhook, KeyRound } from "lucide-react";
 
 /**
  * The catalog of integration types Breakroom knows about. Adding a new
@@ -17,6 +17,13 @@ export interface IntegrationTypeDef {
 }
 
 export const INTEGRATION_TYPES: IntegrationTypeDef[] = [
+  {
+    type: "api_app",
+    name: "API App",
+    description: "Generate an API key to build bots and custom tools against the Breakroom API.",
+    icon: KeyRound,
+    status: "available",
+  },
   {
     type: "roblox_chat",
     name: "Roblox Chat Logger",

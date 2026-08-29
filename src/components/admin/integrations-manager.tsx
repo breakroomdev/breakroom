@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { INTEGRATION_TYPES, getIntegrationType } from "@/lib/integrations/registry";
 import { RobloxConnectWizard } from "@/components/admin/integrations/roblox-connect-wizard";
 import { RobloxManagePanel } from "@/components/admin/integrations/roblox-manage-panel";
+import { ApiAppConnectWizard } from "@/components/admin/integrations/api-app-connect-wizard";
+import { ApiAppManagePanel } from "@/components/admin/integrations/api-app-manage-panel";
 
 export interface IntegrationRow {
   id: string;
@@ -45,8 +47,11 @@ export function IntegrationsManager({ initialIntegrations, basePath }: { initial
   const [integrations, setIntegrations] = React.useState(initialIntegrations);
   const [connecting, setConnecting] = React.useState(false);
   const [managing, setManaging] = React.useState<IntegrationRow | null>(null);
+  const [connectingApiApp, setConnectingApiApp] = React.useState(false);
+  const [managingApiApp, setManagingApiApp] = React.useState<IntegrationRow | null>(null);
 
   const roblox = integrations.find((i) => i.type === "roblox_chat");
+  const apiApp = integrations.find((i) => i.type === "api_app");
 
   function upsert(row: IntegrationRow) {
     setIntegrations((prev) => (prev.some((i) => i.id === row.id) ? prev.map((i) => (i.id === row.id ? row : i)) : [...prev, row]));
@@ -60,6 +65,39 @@ export function IntegrationsManager({ initialIntegrations, basePath }: { initial
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {INTEGRATION_TYPES.map((def) => {
+        if (def.type === "api_app") {
+          return (
+            <Card key={def.type} className="flex flex-col">
+              <CardContent className="flex flex-1 flex-col gap-3 p-5">
+                <div className="flex items-start justify-between">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-brand-soft text-primary">
+                    <def.icon className="h-5 w-5" />
+                  </div>
+                  {apiApp ? <StatusBadge status={apiApp.status} /> : null}
+                </div>
+                <div>
+                  <p className="font-display text-base font-semibold">{def.name}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{def.description}</p>
+                </div>
+                {apiApp ? (
+                  <>
+                    <p className="text-xs text-muted-foreground">
+                      {apiApp.messageCount} request{apiApp.messageCount === 1 ? "" : "s"} served
+                    </p>
+                    <Button variant="secondary" size="sm" className="mt-auto" onClick={() => setManagingApiApp(apiApp)}>
+                      Manage
+                    </Button>
+                  </>
+                ) : (
+                  <Button size="sm" className="mt-auto" onClick={() => setConnectingApiApp(true)}>
+                    <Plus className="h-3.5 w-3.5" /> Create
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          );
+        }
+
         if (def.type === "roblox_chat") {
           return (
             <Card key={def.type} className="flex flex-col">
@@ -130,6 +168,23 @@ export function IntegrationsManager({ initialIntegrations, basePath }: { initial
         typeDef={getIntegrationType("roblox_chat")!}
         basePath={basePath}
         onOpenChange={(open) => !open && setManaging(null)}
+        onChanged={upsert}
+        onDisconnected={remove}
+      />
+
+      <ApiAppConnectWizard
+        open={connectingApiApp}
+        onOpenChange={setConnectingApiApp}
+        onConnected={(row) => {
+          upsert(row);
+          setManagingApiApp(row);
+        }}
+      />
+
+      <ApiAppManagePanel
+        integration={managingApiApp}
+        typeDef={getIntegrationType("api_app")!}
+        onOpenChange={(open) => !open && setManagingApiApp(null)}
         onChanged={upsert}
         onDisconnected={remove}
       />
