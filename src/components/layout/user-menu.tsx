@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { User, Settings, LogOut, ShieldCheck, Crown } from "lucide-react";
+import { User, Settings, LogOut, ShieldCheck, Crown, HelpCircle } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -55,6 +55,12 @@ export function UserMenu({ basePath, name, username, avatarUrl, isAdmin, isSiteA
             </Link>
           </DropdownMenuItem>
         ) : null}
+        <DropdownMenuItem asChild>
+          <Link href="/help">
+            <HelpCircle className="h-4 w-4" />
+            Help Center
+          </Link>
+        </DropdownMenuItem>
         {isSiteAdmin ? (
           <DropdownMenuItem asChild>
             <Link href="/staff">

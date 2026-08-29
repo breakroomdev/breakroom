@@ -475,6 +475,47 @@ export const announcements = sqliteTable("announcements", {
 });
 
 // ─────────────────────────────────────────────────────────────
+// Knowledge Base — kbArticles is a per-workspace internal wiki;
+// helpArticles is the instance-wide, public help center (no
+// workspaceId — same "instance-wide" shape as `announcements`).
+// ─────────────────────────────────────────────────────────────
+
+export const kbArticles = sqliteTable(
+  "kb_articles",
+  {
+    id: id(),
+    workspaceId: text("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    slug: text("slug").notNull(),
+    content: text("content").notNull().default(""), // markdown
+    category: text("category"), // flat freeform tag, not a taxonomy
+    status: text("status", { enum: ["draft", "published"] }).notNull().default("published"),
+    createdBy: text("created_by").notNull().references(() => users.id),
+    ...timestamps,
+  },
+  (t) => ({
+    workspaceSlugIdx: uniqueIndex("kb_articles_workspace_slug_idx").on(t.workspaceId, t.slug),
+  })
+);
+
+export const helpArticles = sqliteTable(
+  "help_articles",
+  {
+    id: id(),
+    title: text("title").notNull(),
+    slug: text("slug").notNull(),
+    content: text("content").notNull().default(""),
+    category: text("category"),
+    status: text("status", { enum: ["draft", "published"] }).notNull().default("published"),
+    createdBy: text("created_by").notNull().references(() => users.id),
+    ...timestamps,
+  },
+  (t) => ({
+    slugIdx: uniqueIndex("help_articles_slug_idx").on(t.slug),
+  })
+);
+
+// ─────────────────────────────────────────────────────────────
 // Relations
 // ─────────────────────────────────────────────────────────────
 
@@ -530,4 +571,8 @@ export const pollOptionsRelations = relations(pollOptions, ({ one, many }) => ({
 export const shiftsRelations = relations(shifts, ({ one }) => ({
   workspace: one(workspaces, { fields: [shifts.workspaceId], references: [workspaces.id] }),
   user: one(users, { fields: [shifts.userId], references: [users.id] }),
+}));
+
+export const kbArticlesRelations = relations(kbArticles, ({ one }) => ({
+  workspace: one(workspaces, { fields: [kbArticles.workspaceId], references: [workspaces.id] }),
 }));

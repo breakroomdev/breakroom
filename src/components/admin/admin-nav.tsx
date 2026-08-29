@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
-import { LayoutDashboard, Users, ShieldCheck, CalendarDays, LayoutGrid, Plug, Building2, KeyRound, Flag } from "lucide-react";
+import { LayoutDashboard, Users, ShieldCheck, CalendarDays, LayoutGrid, Plug, Building2, KeyRound, Flag, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Permission } from "@/lib/permissions";
 
@@ -14,6 +14,7 @@ const TABS: { label: string; href: string; permission: Permission; icon: LucideI
   { label: "Schedule", href: "/schedule", permission: "schedule.manage", icon: CalendarDays },
   { label: "Hub", href: "/hub", permission: "workspace.manage", icon: LayoutGrid },
   { label: "Integrations", href: "/integrations", permission: "workspace.manage", icon: Plug },
+  { label: "Knowledge Base", href: "/kb", permission: "workspace.manage", icon: BookOpen },
   { label: "Workspace", href: "/workspace", permission: "workspace.manage", icon: Building2 },
   { label: "Authentication", href: "/auth", permission: "workspace.manage", icon: KeyRound },
   { label: "Moderation", href: "/moderation", permission: "posts.moderate", icon: Flag },

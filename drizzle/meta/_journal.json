@@ -43,6 +43,13 @@
       "when": 1787904293157,
       "tag": "0005_parched_gauntlet",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1787971004542,
+      "tag": "0006_mushy_carmella_unuscione",
+      "breakpoints": true
     }
   ]
 }

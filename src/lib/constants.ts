@@ -19,6 +19,7 @@ export const RESERVED_SLUGS = new Set([
   "terms",
   "privacy",
   "staff",
+  "help",
 ]);
 
 /**
@@ -39,4 +40,5 @@ export const ROOT_ROUTES = new Set([
   "staff",
   "terms",
   "privacy",
+  "help",
 ]);

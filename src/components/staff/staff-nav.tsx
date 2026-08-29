@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 const TABS = [
   { label: "Workspaces", href: "/staff" },
   { label: "Announcements", href: "/staff/announcements" },
+  { label: "Help Articles", href: "/staff/help-articles" },
 ];
 
 export function StaffNav() {
